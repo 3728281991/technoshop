@@ -5,6 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TechnoShop | Магазин электроники</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Добавьте эти скрипты перед закрывающим </body> -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <script>
+      // Добавьте этот код в самое начало скрипта (после объявления products и promoCodes)
+      const firebaseConfig = {
+        apiKey: "AIzaSyBl4ipzmgL24rjjUDXXHLImjqKRTJFspDQ",
+        authDomain: "technoshop-a1e0e.firebaseapp.com",
+        databaseURL: "https://technoshop-a1e0e-default-rtdb.firebaseio.com",
+        projectId: "technoshop-a1e0e",
+        storageBucket: "technoshop-a1e0e.appspot.com",
+        messagingSenderId: "802053670431",
+        appId: "1:802053670431:web:bb330eefe24751ce5f772a"
+      };
+    
+      // Инициализация Firebase
+      firebase.initializeApp(firebaseConfig);
+      const database = firebase.database();
+    
+      // ЗАМЕНИТЕ текущую функцию processOrder() на эту:
+      function processOrder() {
+        const formData = new FormData(checkoutForm);
+        const orderData = {
+          customer: {
+            firstName: formData.get('firstName'),
+            lastName: formData.get('lastName'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            address: formData.get('address'),
+            city: formData.get('city'),
+            postalCode: formData.get('postalCode')
+          },
+          payment: formData.get('payment'),
+          items: cart,
+          total: cart.reduce((sum, item) => {
+            const product = products.find(p => p.id === item.id);
+            return sum + (product ? product.price * item.quantity : 0);
+          }, 0),
+          discount: promoCodeApplied ? discount : 0,
+          orderDate: new Date().toISOString(),
+          status: "new" // Добавляем статус заказа
+        };
+    
+        // Сохраняем в Firebase
+        const newOrderRef = database.ref('orders').push();
+        newOrderRef.set(orderData)
+          .then(() => {
+            // Очищаем корзину
+            cart = [];
+            promoCodeApplied = false;
+            discount = 0;
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartCount();
+            
+            // Показываем уведомление
+            showNotification(`Заказ #${newOrderRef.key} успешно оформлен!`, 'success');
+            
+            // Закрываем модальное окно
+            setTimeout(() => {
+              checkoutModal.classList.remove('active');
+              document.body.style.overflow = '';
+              checkoutForm.reset();
+            }, 2000);
+          })
+          .catch((error) => {
+            showNotification(`Ошибка: ${error.message}`, 'error');
+          });
+      }
+    </script>
     <style>
         :root {
             --primary: #4361ee;
@@ -2801,3 +2871,4 @@
     </script>
 </body>
 </html>
+
