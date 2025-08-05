@@ -462,18 +462,30 @@
             
             // Загрузка заказов
             function loadOrders() {
-                database.ref('orders').on('value', (snapshot) => {
-                    const orders = [];
-                    snapshot.forEach((childSnapshot) => {
-                        orders.push({
-                            id: childSnapshot.key,
-                            ...childSnapshot.val()
-                        });
-                    });
-                    displayOrders(orders.reverse());
-                    updateStats(orders);
+            database.ref('orders').on('value', (snapshot) => {
+                const orders = [];
+                snapshot.forEach((childSnapshot) => {
+                  orders.push({
+                    id: childSnapshot.key,
+                    ...childSnapshot.val()
+                  });
                 });
+                displayOrders(orders.reverse());
+                updateStats(orders);
+              });
             }
+            
+            window.deleteOrder = function(orderId) {
+            if (confirm('Вы уверены, что хотите удалить этот заказ?')) {
+                database.ref('orders/' + orderId).remove()
+                  .then(() => {
+                    showAdminNotification('Заказ успешно удален');
+                  })
+                  .catch(error => {
+                    showAdminNotification('Ошибка при удалении: ' + error.message, 'error');
+                  });
+              }
+            };
             
             // Отображение заказов
             function displayOrders(orders) {
