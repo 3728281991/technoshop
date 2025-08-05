@@ -2823,32 +2823,55 @@
             }
             
             function processOrder() {
-                const formData = new FormData(checkoutForm);
-                const orderData = {
-                    customer: {
-                        firstName: formData.get('firstName'),
-                        lastName: formData.get('lastName'),
-                        email: formData.get('email'),
-                        phone: formData.get('phone'),
-                        address: formData.get('address'),
-                        city: formData.get('city'),
-                        postalCode: formData.get('postalCode')
-                    },
-                    payment: formData.get('payment'),
-                    items: cart,
-                    total: cart.reduce((sum, item) => {
-                        const product = products.find(p => p.id === item.id);
-                        return sum + (product ? product.price * item.quantity : 0);
-                    }, 0),
-                    discount: promoCodeApplied ? discount : 0,
-                    orderDate: new Date().toISOString(),
-                    orderId: 'ORD-' + Date.now()
-                };
-                
-                // Сохраняем заказ в localStorage (в реальном проекте отправляем на сервер)
-                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-                orders.push(orderData);
-                localStorage.setItem('orders', JSON.stringify(orders));
+            const formData = new FormData(checkoutForm);
+              
+              // Подготовка данных заказа
+              const orderData = {
+                customer: {
+                  firstName: formData.get('firstName'),
+                  lastName: formData.get('lastName'),
+                  email: formData.get('email'),
+                  phone: formData.get('phone'),
+                  address: formData.get('address'),
+                  city: formData.get('city'),
+                  postalCode: formData.get('postalCode')
+                },
+                payment: formData.get('payment'),
+                items: cart,
+                total: cart.reduce((sum, item) => {
+                  const product = products.find(p => p.id === item.id);
+                  return sum + (product ? product.price * item.quantity : 0);
+                }, 0),
+                discount: promoCodeApplied ? discount : 0,
+                orderDate: new Date().toISOString(),
+                status: "new"
+              };
+            
+              console.log("Отправка заказа в Firebase:", orderData); // Логирование
+            
+              // Отправка в Firebase
+              const newOrderRef = database.ref('orders').push();
+              newOrderRef.set(orderData)
+                .then(() => {
+                  console.log("Заказ успешно сохранён, ID:", newOrderRef.key);
+                  cart = [];
+                  promoCodeApplied = false;
+                  discount = 0;
+                  localStorage.setItem('cart', JSON.stringify(cart));
+                  updateCartCount();
+                  showNotification(`Заказ #${newOrderRef.key} успешно оформлен!`, 'success');
+                  
+                  setTimeout(() => {
+                    checkoutModal.classList.remove('active');
+                    document.body.style.overflow = '';
+                    checkoutForm.reset();
+                  }, 2000);
+                })
+                .catch((error) => {
+                  console.error("Ошибка при сохранении заказа:", error);
+                  showNotification(`Ошибка: ${error.message}`, 'error');
+                });
+            }
                 
                 // Очищаем корзину
                 cart = [];
@@ -2897,5 +2920,6 @@
     </script>
 </body>
 </html>
+
 
 
