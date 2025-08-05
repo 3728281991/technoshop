@@ -464,7 +464,11 @@
             
             // Загрузка заказов
             function loadOrders() {
-            database.ref('orders').on('value', (snapshot) => {
+            console.log("Загрузка заказов из Firebase...");
+              
+              database.ref('orders').on('value', (snapshot) => {
+                console.log("Получены данные из Firebase:", snapshot.val());
+                
                 const orders = [];
                 snapshot.forEach((childSnapshot) => {
                   orders.push({
@@ -472,8 +476,13 @@
                     ...childSnapshot.val()
                   });
                 });
+                
+                console.log("Обработанные заказы:", orders);
                 displayOrders(orders.reverse());
                 updateStats(orders);
+              }, (error) => {
+                console.error("Ошибка при загрузке заказов:", error);
+                showAdminNotification('Ошибка загрузки заказов: ' + error.message, 'error');
               });
             }
             
