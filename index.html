@@ -1542,6 +1542,128 @@
                 margin: 20px;
                 max-height: 90vh;
             }
+            /* Стили для статусов заказов */
+            .orders-container {
+                margin-top: 20px;
+            }
+            
+            .order-card {
+                background: var(--card-bg);
+                border-radius: var(--radius);
+                padding: 20px;
+                margin-bottom: 15px;
+                box-shadow: var(--shadow);
+                border: 1px solid var(--border-color);
+            }
+            
+            .order-header {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 15px;
+            }
+            
+            .order-id {
+                font-weight: 600;
+                color: var(--primary);
+            }
+            
+            .order-date {
+                color: var(--text-secondary);
+                font-size: 14px;
+            }
+            
+            .order-status {
+                display: inline-block;
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+            }
+            
+            .status-new {
+                background: var(--primary-light);
+                color: var(--primary);
+            }
+            
+            .status-processing {
+                background: #fef3c7;
+                color: #d97706;
+            }
+            
+            .status-shipped {
+                background: #dbeafe;
+                color: #1d4ed8;
+            }
+            
+            .status-delivered {
+                background: #dcfce7;
+                color: #15803d;
+            }
+            
+            .status-cancelled {
+                background: #fee2e2;
+                color: #b91c1c;
+            }
+            
+            .order-timeline {
+                margin-top: 20px;
+                position: relative;
+                padding-left: 30px;
+            }
+            
+            .timeline-step {
+                position: relative;
+                padding-bottom: 20px;
+            }
+            
+            .timeline-step:last-child {
+                padding-bottom: 0;
+            }
+            
+            .timeline-step::before {
+                content: '';
+                position: absolute;
+                left: -20px;
+                top: 5px;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: var(--border-color);
+                z-index: 2;
+            }
+            
+            .timeline-step.active::before {
+                background: var(--primary);
+                box-shadow: 0 0 0 3px var(--primary-light);
+            }
+            
+            .timeline-step::after {
+                content: '';
+                position: absolute;
+                left: -15px;
+                top: 17px;
+                width: 2px;
+                height: 100%;
+                background: var(--border-color);
+            }
+            
+            .timeline-step:last-child::after {
+                display: none;
+            }
+            
+            .timeline-step.active::after {
+                background: var(--primary);
+            }
+            
+            .timeline-text {
+                font-size: 14px;
+                margin-bottom: 5px;
+            }
+            
+            .timeline-date {
+                font-size: 12px;
+                color: var(--text-secondary);
+            }
         }
         
         /* Очень маленькие экраны */
@@ -1572,6 +1694,16 @@
     </style>
 </head>
 <body>
+    <!-- Статус заказа -->
+    <section id="orders" class="content-section">
+        <h1 class="page-title">
+            <i class="fas fa-clipboard-check"></i> Мои заказы
+        </h1>
+        <div id="user-orders-list" class="orders-container">
+            <!-- Сюда подгрузятся заказы пользователя -->
+        </div>
+    </section>
+    
     <!-- Хедер -->
     <header>
         <div class="header-container">
@@ -2835,9 +2967,71 @@
                 }, 3000);
             }
         });
+
+            // ====== Начало кода для статусов заказов ======
+      function initUserOrders() {
+        const userOrderIds = JSON.parse(localStorage.getItem('userOrders')) || [];
+        if (userOrderIds.length > 0) {
+          loadUserOrders(userOrderIds);
+        } else {
+          document.getElementById('user-orders-list').innerHTML = `
+            <div class="empty-orders">
+              <i class="fas fa-inbox"></i>
+              <p>У вас пока нет заказов</p>
+            </div>
+          `;
+        }
+      }
+    
+      function loadUserOrders(orderIds) {
+        orderIds.forEach(orderId => {
+          const orderRef = database.ref('orders').child(orderId);
+          orderRef.on('value', (snapshot) => {
+            if (snapshot.exists()) {
+              updateOrderCard(snapshot.val());
+            }
+          });
+        });
+      }
+    
+      function updateOrderCard(order) {
+        const orderId = order.orderId || order.key;
+        let card = document.getElementById(`order-${orderId}`);
+        if (!card) {
+          card = document.createElement('div');
+          card.className = 'order-card';
+          card.id = `order-${orderId}`;
+          document.getElementById('user-orders-list').appendChild(card);
+        }
+        card.innerHTML = `
+          <div class="order-header">
+            <span class="order-id">Заказ #${orderId}</span>
+            <span class="order-date">${new Date(order.orderDate).toLocaleDateString('ru-RU')}</span>
+          </div>
+          <div class="order-status status-${order.status || 'new'}">
+            ${getStatusText(order.status)}
+          </div>
+        `;
+      }
+    
+      function getStatusText(status) {
+        const statusMap = {
+          'new': 'Новый',
+          'processing': 'В обработке',
+          'shipped': 'Отправлен',
+          'delivered': 'Доставлен',
+          'cancelled': 'Отменен'
+        };
+        return statusMap[status] || 'Новый';
+      }
+    
+      // Запускаем при загрузке страницы
+      document.addEventListener('DOMContentLoaded', initUserOrders);
+      // ====== Конец кода для статусов ======
     </script>
 </body>
 </html>
+
 
 
 
