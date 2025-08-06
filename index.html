@@ -1664,6 +1664,51 @@
                 font-size: 12px;
                 color: var(--text-secondary);
             }
+            
+            .order-items {
+                margin-top: 15px;
+                border-top: 1px solid var(--border-color);
+                padding-top: 15px;
+            }
+            
+            .order-item {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                margin-bottom: 10px;
+            }
+            
+            .order-item img {
+                width: 50px;
+                height: 50px;
+                object-fit: contain;
+                border-radius: 5px;
+            }
+            
+            .order-total {
+                margin-top: 15px;
+                padding-top: 15px;
+                border-top: 1px solid var(--border-color);
+                font-weight: 600;
+                text-align: right;
+                font-size: 16px;
+            }
+            
+            .empty-orders {
+                text-align: center;
+                padding: 40px 20px;
+            }
+            
+            .empty-orders i {
+                font-size: 40px;
+                color: var(--primary);
+                margin-bottom: 15px;
+            }
+            
+            .empty-orders p {
+                color: var(--text-secondary);
+                font-size: 16px;
+            }
         }
         
         /* Очень маленькие экраны */
@@ -2968,12 +3013,114 @@
             }
         });
 
-            // ====== Начало кода для статусов заказов ======
-      function initUserOrders() {
-        const userOrderIds = JSON.parse(localStorage.getItem('userOrders')) || [];
-        if (userOrderIds.length > 0) {
-          loadUserOrders(userOrderIds);
-        } else {
+        // ====== Полный код для работы с заказами ======
+        document.addEventListener('DOMContentLoaded', function() {
+          // Проверяем, есть ли заказы у пользователя при загрузке страницы
+          checkUserOrders();
+        });
+        
+        // Функция проверки и загрузки заказов
+        function checkUserOrders() {
+          const userOrders = JSON.parse(localStorage.getItem('userOrders')) || [];
+          if (userOrders.length > 0) {
+            loadOrders(userOrders);
+          } else {
+            showEmptyOrders();
+          }
+        }
+        
+        // Загрузка заказов из Firebase
+        function loadOrders(orderIds) {
+          const ordersContainer = document.getElementById('user-orders-list');
+          ordersContainer.innerHTML = '<p>Загрузка ваших заказов...</p>';
+        
+          orderIds.forEach(orderId => {
+            const orderRef = firebase.database().ref('orders/' + orderId);
+            orderRef.once('value').then(snapshot => {
+              if (snapshot.exists()) {
+                displayOrderCard(snapshot.val());
+              }
+            });
+          });
+        }
+        
+        // Отображение карточки заказа
+        function displayOrderCard(order) {
+          const ordersContainer = document.getElementById('user-orders-list');
+          
+          // Очищаем сообщение о загрузке при первом заказе
+          if (ordersContainer.innerHTML.includes('Загрузка')) {
+            ordersContainer.innerHTML = '';
+          }
+        
+          const orderCard = document.createElement('div');
+          orderCard.className = 'order-card';
+          orderCard.innerHTML = `
+            <div class="order-header">
+              <span class="order-id">Заказ #${order.orderId || 'N/A'}</span>
+              <span class="order-date">${formatDate(order.orderDate)}</span>
+            </div>
+            <div class="order-status ${getStatusClass(order.status)}">
+              ${getStatusText(order.status)}
+            </div>
+            <div class="order-items">
+              ${renderItems(order.items)}
+            </div>
+            <div class="order-total">
+              Итого: ${order.total.toLocaleString('ru-RU')} ₽
+            </div>
+          `;
+          
+          ordersContainer.appendChild(orderCard);
+        }
+        
+        // Форматирование даты
+        function formatDate(dateString) {
+          const options = { day: 'numeric', month: 'long', year: 'numeric' };
+          return new Date(dateString).toLocaleDateString('ru-RU', options);
+        }
+        
+        // Получение класса для статуса
+        function getStatusClass(status) {
+          const statusClasses = {
+            'new': 'status-new',
+            'processing': 'status-processing',
+            'shipped': 'status-shipped',
+            'delivered': 'status-delivered',
+            'cancelled': 'status-cancelled'
+          };
+          return statusClasses[status] || 'status-new';
+        }
+        
+        // Получение текста статуса
+        function getStatusText(status) {
+          const statusTexts = {
+            'new': 'Новый',
+            'processing': 'В обработке',
+            'shipped': 'Отправлен',
+            'delivered': 'Доставлен',
+            'cancelled': 'Отменен'
+          };
+          return statusTexts[status] || 'Новый';
+        }
+        
+        // Отрисовка товаров в заказе
+        function renderItems(items) {
+          if (!items || items.length === 0) {
+            return '<p>Нет информации о товарах</p>';
+          }
+        
+          return items.map(item => `
+            <div class="order-item">
+              <img src="${item.image}" alt="${item.name}" width="50">
+              <span>${item.name}</span>
+              <span>${item.quantity} × ${item.price.toLocaleString('ru-RU')} ₽</span>
+            </div>
+          `).join('');
+        }
+        
+        // Показ пустого состояния
+        function showEmptyOrders() {
           document.getElementById('user-orders-list').innerHTML = `
             <div class="empty-orders">
               <i class="fas fa-inbox"></i>
@@ -2981,68 +3128,18 @@
             </div>
           `;
         }
-      }
-    
-      function loadUserOrders(orderIds) {
-        orderIds.forEach(orderId => {
-          const orderRef = database.ref('orders').child(orderId);
-          orderRef.on('value', (snapshot) => {
-            if (snapshot.exists()) {
-              updateOrderCard(snapshot.val());
-            }
+        
+        // Обработчик перехода в раздел заказов
+        function showOrdersSection() {
+          document.querySelectorAll('.content-section').forEach(section => {
+            section.classList.remove('active');
           });
-        });
-      }
-    
-      function updateOrderCard(order) {
-        const orderId = order.orderId || order.key;
-        let card = document.getElementById(`order-${orderId}`);
-        if (!card) {
-          card = document.createElement('div');
-          card.className = 'order-card';
-          card.id = `order-${orderId}`;
-          document.getElementById('user-orders-list').appendChild(card);
+          document.getElementById('orders').classList.add('active');
+          checkUserOrders();
         }
-        card.innerHTML = `
-          <div class="order-header">
-            <span class="order-id">Заказ #${orderId}</span>
-            <span class="order-date">${new Date(order.orderDate).toLocaleDateString('ru-RU')}</span>
-          </div>
-          <div class="order-status status-${order.status || 'new'}">
-            ${getStatusText(order.status)}
-          </div>
-        `;
-      }
-    
-      function getStatusText(status) {
-        const statusMap = {
-          'new': 'Новый',
-          'processing': 'В обработке',
-          'shipped': 'Отправлен',
-          'delivered': 'Доставлен',
-          'cancelled': 'Отменен'
-        };
-        return statusMap[status] || 'Новый';
-      }
-    
-      // Запускаем при загрузке страницы
-      document.addEventListener('DOMContentLoaded', initUserOrders);
-      // ====== Конец кода для статусов ======
+        
+        // Назначаем обработчик на кнопку меню
+        document.querySelector('[data-section="orders"]').addEventListener('click', showOrdersSection);
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
