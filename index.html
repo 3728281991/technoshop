@@ -2312,19 +2312,21 @@
                     `;
                     return;
                 }
-        
+            
                 ordersContainer.innerHTML = '<p class="loading">Загрузка заказов...</p>';
-        
+                
+                // Удаляем все предыдущие слушатели
                 userOrders.forEach(orderId => {
-                    database.ref('orders/' + orderId).once('value')
-                        .then(snapshot => {
-                            if (snapshot.exists()) {
-                                displayOrder(snapshot.val());
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Ошибка загрузки заказа:', error);
-                        });
+                    database.ref('orders/' + orderId).off('value');
+                });
+            
+                // Добавляем слушатели для каждого заказа
+                userOrders.forEach(orderId => {
+                    database.ref('orders/' + orderId).on('value', snapshot => {
+                        if (snapshot.exists()) {
+                            updateOrderCard(snapshot.val(), orderId);
+                        }
+                    });
                 });
             }
         
@@ -3098,4 +3100,5 @@
     </script>
 </body>
 </html>
+
 
