@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel | TechnoShop</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
+        /* Ваши стили остаются без изменений */
         :root {
             --primary: #4361ee;
             --primary-light: #ebefff;
@@ -613,6 +616,7 @@
     </header>
 
     <main class="admin-container" id="adminMain">
+        <!-- Статистика -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-title">Всего заказов</div>
@@ -632,6 +636,7 @@
             </div>
         </div>
 
+        <!-- Заказы -->
         <div class="orders-section">
             <div class="orders-header">
                 <h2 class="orders-title">Заказы</h2>
@@ -678,6 +683,7 @@
         </div>
     </main>
 
+    <!-- Модальное окно просмотра заказа -->
     <div class="order-modal" id="orderModal">
         <div class="order-modal-content">
             <div class="order-modal-header">
@@ -710,327 +716,465 @@
     </div>
 
     <script>
+        // Инициализация Firebase (должна совпадать с вашим магазином)
+        firebase.initializeApp({
+            apiKey: "AIzaSyBl4ipzmgL24rjjUDXXHLImjqKRTJFspDQ",
+            authDomain: "technoshop-a1e0e.firebaseapp.com",
+            databaseURL: "https://technoshop-a1e0e-default-rtdb.firebaseio.com",
+            projectId: "technoshop-a1e0e",
+            storageBucket: "technoshop-a1e0e.appspot.com",
+            messagingSenderId: "802053670431",
+            appId: "1:802053670431:web:bb330eefe24751ce5f772a"
+        });
+
+        // Получаем ссылку на базу данных
+        const database = firebase.database();
+        const ordersRef = database.ref('orders');
+
         // Глобальные переменные
         let currentOrderId = null;
-
-        // Основные функции
-        function viewOrder(orderId) {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const order = orders.find(o => o.orderId === orderId);
-            
-            if (!order) return;
-            
-            currentOrderId = orderId;
-            document.getElementById('statusSelect').value = order.status || 'new';
-            document.getElementById('modalOrderTitle').textContent = `Заказ #${orderId}`;
-            
-            // Формируем содержимое модального окна
-            let html = `
-                <div class="order-details-grid">
-                    <div class="order-section">
-                        <h4>Информация о клиенте</h4>
-                        <div class="order-info">
-                            <div class="order-info-row">
-                                <div class="order-info-label">Имя:</div>
-                                <div class="order-info-value">${order.customer.firstName} ${order.customer.lastName}</div>
-                            </div>
-                            <div class="order-info-row">
-                                <div class="order-info-label">Email:</div>
-                                <div class="order-info-value">${order.customer.email}</div>
-                            </div>
-                            <div class="order-info-row">
-                                <div class="order-info-label">Телефон:</div>
-                                <div class="order-info-value">${order.customer.phone}</div>
-                            </div>
-                            <div class="order-info-row">
-                                <div class="order-info-label">Адрес:</div>
-                                <div class="order-info-value">${order.customer.address}, ${order.customer.city}, ${order.customer.postalCode || ''}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="order-section">
-                        <h4>Информация о заказе</h4>
-                        <div class="order-info">
-                            <div class="order-info-row">
-                                <div class="order-info-label">Дата заказа:</div>
-                                <div class="order-info-value">${new Date(order.orderDate).toLocaleString('ru-RU')}</div>
-                            </div>
-                            <div class="order-info-row">
-                                <div class="order-info-label">Способ оплаты:</div>
-                                <div class="order-info-value">${order.payment === 'cash' ? 'Наличными при получении' : 'Банковская карта'}</div>
-                            </div>
-                            <div class="order-info-row">
-                                <div class="order-info-label">Статус:</div>
-                                <div class="order-info-value"><span class="order-status status-${order.status || 'new'}">${getStatusText(order.status || 'new')}</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="order-section">
-                    <h4>Товары в заказе</h4>
-                    <table class="order-items">
-                        <thead>
-                            <tr>
-                                <th>Товар</th>
-                                <th>Цена</th>
-                                <th>Количество</th>
-                                <th>Сумма</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            order.items.forEach(item => {
-                html += `
-                    <tr>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <div class="order-item-image">
-                                    <img src="${item.image}" alt="${item.name}">
-                                </div>
-                                <div>${item.name}</div>
-                            </div>
-                        </td>
-                        <td>${item.price.toLocaleString('ru-RU')} ₽</td>
-                        <td>${item.quantity}</td>
-                        <td>${(item.price * item.quantity).toLocaleString('ru-RU')} ₽</td>
-                    </tr>
-                `;
-            });
-            
-            html += `
-                        </tbody>
-                    </table>
-                    
-                    <div class="order-summary">
-                        <table class="order-summary-table">
-                            <tr>
-                                <td>Сумма заказа:</td>
-                                <td>${order.subtotal.toLocaleString('ru-RU')} ₽</td>
-                            </tr>
-                            ${order.discount ? `
-                            <tr>
-                                <td>Скидка:</td>
-                                <td>-${(order.subtotal * order.discount).toLocaleString('ru-RU')} ₽ (${order.discount * 100}%)</td>
-                            </tr>
-                            ` : ''}
-                            <tr>
-                                <td>Итого к оплате:</td>
-                                <td>${order.total.toLocaleString('ru-RU')} ₽</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('orderModalBody').innerHTML = html;
-            document.getElementById('orderModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function deleteOrder(orderId) {
-            if (confirm('Вы уверены, что хотите удалить этот заказ?')) {
-                const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-                const filteredOrders = orders.filter(o => o.orderId !== orderId);
-                localStorage.setItem('orders', JSON.stringify(filteredOrders));
-                loadOrders();
-                updateStats();
-                alert('Заказ удален');
-            }
-        }
-
-        function getStatusText(status) {
-            const statuses = {
-                'new': 'Новый',
-                'processing': 'В обработке',
-                'shipped': 'Отправлен',
-                'delivered': 'Доставлен',
-                'cancelled': 'Отменен'
-            };
-            return statuses[status] || 'Новый';
-        }
-
-        function closeModal() {
-            document.getElementById('orderModal').classList.remove('active');
-            document.body.style.overflow = '';
-        }
-
-        function saveOrderStatus() {
-            if (!currentOrderId) return;
-            
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const orderIndex = orders.findIndex(o => o.orderId === currentOrderId);
-            
-            if (orderIndex === -1) return;
-            
-            orders[orderIndex].status = document.getElementById('statusSelect').value;
-            localStorage.setItem('orders', JSON.stringify(orders));
-            
-            loadOrders();
-            updateStats();
-            closeModal();
-            alert('Статус заказа успешно обновлен');
-        }
-
-        function loadOrders() {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            displayOrders(orders);
-        }
-
-        function displayOrders(orders) {
-            const ordersTableBody = document.getElementById('ordersTableBody');
-            ordersTableBody.innerHTML = '';
-            
-            if (orders.length === 0) {
-                ordersTableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">
-                            <i class="fas fa-inbox" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
-                            Заказов пока нет
-                        </td>
-                    </tr>
-                `;
-                return;
-            }
-            
-            orders.forEach(order => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${order.orderId}</td>
-                    <td>${order.customer.firstName} ${order.customer.lastName}</td>
-                    <td>${new Date(order.orderDate).toLocaleDateString('ru-RU')}</td>
-                    <td>${order.total.toLocaleString('ru-RU')} ₽</td>
-                    <td>
-                        <span class="order-status status-${order.status || 'new'}">${getStatusText(order.status || 'new')}</span>
-                    </td>
-                    <td>
-                        <div class="order-actions">
-                            <button class="action-btn btn-view" onclick="viewOrder('${order.orderId}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="action-btn btn-delete" onclick="deleteOrder('${order.orderId}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                ordersTableBody.appendChild(row);
-            });
-        }
-
-        function filterOrders() {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            const statusFilter = document.getElementById('statusFilter').value;
-            const sortFilter = document.getElementById('sortFilter').value;
-            
-            let filtered = orders;
-            
-            if (statusFilter) {
-                filtered = filtered.filter(order => order.status === statusFilter);
-            }
-            
-            switch (sortFilter) {
-                case 'date-desc':
-                    filtered.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-                    break;
-                case 'date-asc':
-                    filtered.sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate));
-                    break;
-                case 'total-desc':
-                    filtered.sort((a, b) => b.total - a.total);
-                    break;
-                case 'total-asc':
-                    filtered.sort((a, b) => a.total - b.total);
-                    break;
-            }
-            
-            displayOrders(filtered);
-        }
-
-        function updateStats() {
-            const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-            
-            document.getElementById('totalOrders').textContent = orders.length;
-            document.getElementById('newOrders').textContent = orders.filter(o => !o.status || o.status === 'new').length;
-            
-            const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
-            document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString('ru-RU') + ' ₽';
-            
-            const avgOrder = orders.length > 0 ? totalRevenue / orders.length : 0;
-            document.getElementById('avgOrder').textContent = avgOrder.toLocaleString('ru-RU') + ' ₽';
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            
-            const icon = document.getElementById('themeToggle').querySelector('i');
-            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-
-        function initTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            
-            const icon = document.getElementById('themeToggle').querySelector('i');
-            icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-        }
-
-        function showAdminPanel() {
-            document.getElementById('loginContainer').style.display = 'none';
-            document.getElementById('adminHeader').style.display = 'block';
-            document.getElementById('adminMain').style.display = 'block';
-            document.getElementById('themeToggle').style.display = 'flex';
-            
-            initTheme();
-            loadOrders();
-            updateStats();
-        }
+        let orders = [];
 
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
+            const loginContainer = document.getElementById('loginContainer');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const loginBtn = document.getElementById('loginBtn');
+            const loginError = document.getElementById('loginError');
+            
+            const themeToggle = document.getElementById('themeToggle');
+            const adminHeader = document.getElementById('adminHeader');
+            const adminMain = document.getElementById('adminMain');
+            const statusFilter = document.getElementById('statusFilter');
+            const sortFilter = document.getElementById('sortFilter');
+            const ordersTableBody = document.getElementById('ordersTableBody');
+            const orderModal = document.getElementById('orderModal');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const modalOrderTitle = document.getElementById('modalOrderTitle');
+            const orderModalBody = document.getElementById('orderModalBody');
+            const statusSelect = document.getElementById('statusSelect');
+            const saveStatusBtn = document.getElementById('saveStatusBtn');
+            const deleteOrderBtn = document.getElementById('deleteOrderBtn');
+            
             // Проверка авторизации
             if (localStorage.getItem('adminLoggedIn') === 'true') {
                 showAdminPanel();
             }
             
             // Обработчик входа
-            document.getElementById('loginBtn').addEventListener('click', function() {
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                if (username === 'admin' && password === 'admin') {
+            loginBtn.addEventListener('click', function() {
+                if (usernameInput.value === 'admin' && passwordInput.value === 'admin') {
                     localStorage.setItem('adminLoggedIn', 'true');
                     showAdminPanel();
                 } else {
-                    document.getElementById('loginError').style.display = 'block';
+                    loginError.style.display = 'block';
                 }
             });
             
+            // Показ админ панели
+            function showAdminPanel() {
+                loginContainer.style.display = 'none';
+                adminHeader.style.display = 'block';
+                adminMain.style.display = 'block';
+                themeToggle.style.display = 'flex';
+                
+                // Инициализация темы
+                initTheme();
+                
+                // Загружаем заказы из Firebase
+                loadOrders();
+            }
+            
             // Обработчики событий
-            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-            document.getElementById('statusFilter').addEventListener('change', filterOrders);
-            document.getElementById('sortFilter').addEventListener('change', filterOrders);
-            document.getElementById('closeModalBtn').addEventListener('click', closeModal);
-            document.getElementById('saveStatusBtn').addEventListener('click', saveOrderStatus);
-            document.getElementById('deleteOrderBtn').addEventListener('click', function() {
+            themeToggle.addEventListener('click', toggleTheme);
+            statusFilter.addEventListener('change', filterOrders);
+            sortFilter.addEventListener('change', filterOrders);
+            closeModalBtn.addEventListener('click', closeModal);
+            saveStatusBtn.addEventListener('click', saveOrderStatus);
+            deleteOrderBtn.addEventListener('click', deleteCurrentOrder);
+            
+            // Переключение темы
+            function toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                const icon = themeToggle.querySelector('i');
+                if (newTheme === 'dark') {
+                    icon.className = 'fas fa-sun';
+                } else {
+                    icon.className = 'fas fa-moon';
+                }
+            }
+            
+            function initTheme() {
+                const savedTheme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                
+                const icon = themeToggle.querySelector('i');
+                if (savedTheme === 'dark') {
+                    icon.className = 'fas fa-sun';
+                } else {
+                    icon.className = 'fas fa-moon';
+                }
+            }
+            
+            // Загрузка заказов из Firebase
+            function loadOrders() {
+                ordersRef.on('value', (snapshot) => {
+                    orders = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const order = childSnapshot.val();
+                        order.key = childSnapshot.key; // Сохраняем ключ для удаления/обновления
+                        orders.push(order);
+                    });
+                    
+                    displayOrders(orders);
+                    updateStats();
+                });
+            }
+            
+            // Отображение заказов
+            function displayOrders(ordersArray) {
+                ordersTableBody.innerHTML = '';
+                
+                if (ordersArray.length === 0) {
+                    ordersTableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                                <i class="fas fa-inbox" style="font-size: 40px; margin-bottom: 10px; display: block;"></i>
+                                Заказов пока нет
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                ordersArray.forEach(order => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${order.orderId}</td>
+                        <td>${order.customer.firstName} ${order.customer.lastName}</td>
+                        <td>${new Date(order.orderDate).toLocaleDateString('ru-RU')}</td>
+                        <td>${order.total.toLocaleString('ru-RU')} ₽</td>
+                        <td>
+                            <span class="order-status status-${order.status || 'new'}">${getStatusText(order.status || 'new')}</span>
+                        </td>
+                        <td>
+                            <div class="order-actions">
+                                <button class="action-btn btn-view" data-id="${order.key}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="action-btn btn-delete" data-id="${order.key}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    ordersTableBody.appendChild(row);
+                });
+                
+                // Добавляем обработчики событий для кнопок
+                document.querySelectorAll('.btn-view').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const orderId = this.getAttribute('data-id');
+                        viewOrder(orderId);
+                    });
+                });
+                
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const orderId = this.getAttribute('data-id');
+                        deleteOrder(orderId);
+                    });
+                });
+            }
+            
+            // Получение текста статуса
+            function getStatusText(status) {
+                const statuses = {
+                    'new': 'Новый',
+                    'processing': 'В обработке',
+                    'shipped': 'Отправлен',
+                    'delivered': 'Доставлен',
+                    'cancelled': 'Отменен'
+                };
+                return statuses[status] || 'Новый';
+            }
+            
+            // Фильтрация заказов
+            function filterOrders() {
+                const status = statusFilter.value;
+                const sort = sortFilter.value;
+                
+                let filtered = [...orders];
+                
+                // Фильтр по статусу
+                if (status) {
+                    filtered = filtered.filter(order => order.status === status);
+                }
+                
+                // Сортировка
+                switch (sort) {
+                    case 'date-desc':
+                        filtered.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+                        break;
+                    case 'date-asc':
+                        filtered.sort((a, b) => new Date(a.orderDate) - new Date(b.orderDate));
+                        break;
+                    case 'total-desc':
+                        filtered.sort((a, b) => b.total - a.total);
+                        break;
+                    case 'total-asc':
+                        filtered.sort((a, b) => a.total - b.total);
+                        break;
+                }
+                
+                displayOrders(filtered);
+            }
+            
+            // Обновление статистики
+            function updateStats() {
+                document.getElementById('totalOrders').textContent = orders.length;
+                document.getElementById('newOrders').textContent = orders.filter(o => !o.status || o.status === 'new').length;
+                
+                const totalRevenue = orders.reduce((sum, order) => sum + order.total, 0);
+                document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString('ru-RU') + ' ₽';
+                
+                const avgOrder = orders.length > 0 ? totalRevenue / orders.length : 0;
+                document.getElementById('avgOrder').textContent = avgOrder.toLocaleString('ru-RU') + ' ₽';
+            }
+            
+            // Просмотр заказа
+            function viewOrder(orderKey) {
+                const order = orders.find(o => o.key === orderKey);
+                
+                if (!order) return;
+                
+                currentOrderId = orderKey;
+                statusSelect.value = order.status || 'new';
+                
+                modalOrderTitle.textContent = `Заказ #${order.orderId}`;
+                
+                // Формируем содержимое модального окна
+                let html = `
+                    <div class="order-details-grid">
+                        <div class="order-section">
+                            <h4>Информация о клиенте</h4>
+                            <div class="order-info">
+                                <div class="order-info-row">
+                                    <div class="order-info-label">Имя:</div>
+                                    <div class="order-info-value">${order.customer.firstName} ${order.customer.lastName}</div>
+                                </div>
+                                <div class="order-info-row">
+                                    <div class="order-info-label">Email:</div>
+                                    <div class="order-info-value">${order.customer.email}</div>
+                                </div>
+                                <div class="order-info-row">
+                                    <div class="order-info-label">Телефон:</div>
+                                    <div class="order-info-value">${order.customer.phone}</div>
+                                </div>
+                                <div class="order-info-row">
+                                    <div class="order-info-label">Адрес:</div>
+                                    <div class="order-info-value">${order.customer.address}, ${order.customer.city}${order.customer.postalCode ? ', ' + order.customer.postalCode : ''}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="order-section">
+                            <h4>Информация о заказе</h4>
+                            <div class="order-info">
+                                <div class="order-info-row">
+                                    <div class="order-info-label">Дата заказа:</div>
+                                    <div class="order-info-value">${new Date(order.orderDate).toLocaleString('ru-RU')}</div>
+                                </div>
+                                <div class="order-info-row">
+                                    <div class="order-info-label">Способ оплаты:</div>
+                                    <div class="order-info-value">${order.payment === 'cash' ? 'Наличными при получении' : 'Банковская карта'}</div>
+                                </div>
+                                <div class="order-info-row">
+                                    <div class="order-info-label">Статус:</div>
+                                    <div class="order-info-value"><span class="order-status status-${order.status || 'new'}">${getStatusText(order.status || 'new')}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="order-section">
+                        <h4>Товары в заказе</h4>
+                        <table class="order-items">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Цена</th>
+                                    <th>Количество</th>
+                                    <th>Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                order.items.forEach(item => {
+                    html += `
+                        <tr>
+                            <td>
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <div class="order-item-image">
+                                        <img src="${item.image}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/60'">
+                                    </div>
+                                    <div>${item.name}</div>
+                                </div>
+                            </td>
+                            <td>${item.price.toLocaleString('ru-RU')} ₽</td>
+                            <td>${item.quantity}</td>
+                            <td>${(item.price * item.quantity).toLocaleString('ru-RU')} ₽</td>
+                        </tr>
+                    `;
+                });
+                
+                html += `
+                            </tbody>
+                        </table>
+                        
+                        <div class="order-summary">
+                            <table class="order-summary-table">
+                                <tr>
+                                    <td>Сумма заказа:</td>
+                                    <td>${order.subtotal.toLocaleString('ru-RU')} ₽</td>
+                                </tr>
+                                ${order.discount ? `
+                                <tr>
+                                    <td>Скидка:</td>
+                                    <td>-${(order.subtotal * order.discount).toLocaleString('ru-RU')} ₽ (${order.discount * 100}%)</td>
+                                </tr>
+                                ` : ''}
+                                <tr>
+                                    <td>Итого к оплате:</td>
+                                    <td>${order.total.toLocaleString('ru-RU')} ₽</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                `;
+                
+                orderModalBody.innerHTML = html;
+                orderModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+            
+            // Закрытие модального окна
+            function closeModal() {
+                orderModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+            
+            // Сохранение статуса заказа
+            function saveOrderStatus() {
+                if (!currentOrderId) return;
+                
+                const newStatus = statusSelect.value;
+                const orderRef = database.ref('orders/' + currentOrderId);
+                
+                orderRef.update({ status: newStatus })
+                    .then(() => {
+                        showNotification('Статус заказа успешно обновлен');
+                        closeModal();
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при обновлении статуса:', error);
+                        showNotification('Ошибка при обновлении статуса', 'error');
+                    });
+            }
+            
+            // Удаление текущего заказа
+            function deleteCurrentOrder() {
                 if (!currentOrderId) return;
                 
                 if (confirm('Вы уверены, что хотите удалить этот заказ?')) {
-                    const orders = JSON.parse(localStorage.getItem('orders') || '[]');
-                    const filteredOrders = orders.filter(o => o.orderId !== currentOrderId);
-                    localStorage.setItem('orders', JSON.stringify(filteredOrders));
+                    const orderRef = database.ref('orders/' + currentOrderId);
                     
-                    loadOrders();
-                    updateStats();
-                    closeModal();
-                    alert('Заказ удален');
+                                        orderRef.remove()
+                        .then(() => {
+                            showNotification('Заказ успешно удален');
+                            closeModal();
+                        })
+                        .catch(error => {
+                            console.error('Ошибка при удалении заказа:', error);
+                            showNotification('Ошибка при удалении заказа', 'error');
+                        });
                 }
-            });
+            }
+            
+            // Удаление заказа из списка
+            function deleteOrder(orderKey) {
+                if (confirm('Вы уверены, что хотите удалить этот заказ?')) {
+                    const orderRef = database.ref('orders/' + orderKey);
+                    
+                    orderRef.remove()
+                        .then(() => {
+                            showNotification('Заказ успешно удален');
+                        })
+                        .catch(error => {
+                            console.error('Ошибка при удалении заказа:', error);
+                            showNotification('Ошибка при удалении заказа', 'error');
+                        });
+                }
+            }
+            
+            // Показать уведомление
+            function showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 10);
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        document.body.removeChild(notification);
+                    }, 300);
+                }, 3000);
+            }
+            
+            // Добавляем стили для уведомлений
+            const style = document.createElement('style');
+            style.textContent = `
+                .notification {
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    padding: 15px 20px;
+                    border-radius: var(--radius);
+                    color: white;
+                    font-weight: 500;
+                    transform: translateY(100px);
+                    opacity: 0;
+                    transition: all 0.3s ease;
+                    z-index: 1000;
+                    box-shadow: var(--shadow-hover);
+                }
+                
+                .notification.show {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+                
+                .notification.success {
+                    background: var(--success);
+                }
+                
+                .notification.error {
+                    background: var(--danger);
+                }
+            `;
+            document.head.appendChild(style);
         });
     </script>
 </body>
