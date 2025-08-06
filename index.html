@@ -2069,7 +2069,7 @@
     </main>
 
     <script>
-        // Инициализация Firebase
+                // Инициализация Firebase
         firebase.initializeApp({
             apiKey: "AIzaSyBl4ipzmgL24rjjUDXXHLImjqKRTJFspDQ",
             authDomain: "technoshop-a1e0e.firebaseapp.com",
@@ -2079,10 +2079,10 @@
             messagingSenderId: "802053670431",
             appId: "1:802053670431:web:bb330eefe24751ce5f772a"
         });
-
+        
         // Получаем ссылку на базу данных
         const database = firebase.database();
-
+        
         // Данные товаров
         const products = [
             {
@@ -2223,7 +2223,7 @@
                 isPromo: true
             }
         ];
-
+        
         // Промокоды
         const promoCodes = [
             {
@@ -2233,7 +2233,7 @@
                 active: true
             }
         ];
-
+        
         // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
             // Получаем элементы DOM
@@ -2253,8 +2253,6 @@
             const menuLinks = document.querySelectorAll('.menu-link');
             const contentSections = document.querySelectorAll('.content-section');
             const logo = document.getElementById('logo');
-                
-            // Новые элементы для фильтров
             const filtersBtn = document.getElementById('filtersBtn');
             const filtersModal = document.getElementById('filtersModal');
             const closeFiltersBtn = document.getElementById('closeFiltersBtn');
@@ -2264,284 +2262,159 @@
             const priceRange = document.getElementById('priceRange');
             const priceValue = document.getElementById('priceValue');
             const themeToggle = document.getElementById('themeToggle');
-                
-            // Элементы формы оформления заказа
             const checkoutModal = document.getElementById('checkoutModal');
             const closeCheckoutBtn = document.getElementById('closeCheckoutBtn');
             const cancelCheckoutBtn = document.getElementById('cancelCheckoutBtn');
             const checkoutForm = document.getElementById('checkoutForm');
             const checkoutTotal = document.getElementById('checkoutTotal');
-            
+        
             // Инициализация данных
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
             let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
             let promoCodeApplied = false;
             let discount = 0;
-            
-            // Инициализация темы
-            initTheme();
-            
-            // Обновляем счетчики
-            updateCartCount();
-            updateFavoritesCount();
-            
-            // Рендерим товары
-            renderProducts(products, productsContainer);
-            renderFavorites();
-            renderCart();
-            
-            // Бургер-меню
-            burgerBtn.addEventListener('click', toggleSidebar);
-            overlay.addEventListener('click', closeSidebar);
-            
-            // Навигация по разделам
-            menuLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const sectionId = this.getAttribute('data-section');
-                    showSection(sectionId);
-                    closeSidebar();
-                });
-            });
-            
-            // Кнопки в хедере
-            cartBtn.addEventListener('click', () => showSection('cart'));
-            favoritesBtn.addEventListener('click', () => showSection('favorites'));
-                
-            // Переключение темы
-            themeToggle.addEventListener('click', toggleTheme);
-                
-            // Фильтры и категории
-            filtersBtn.addEventListener('click', openFiltersModal);
-            closeFiltersBtn.addEventListener('click', closeFiltersModal);
-            applyFiltersBtn.addEventListener('click', applyFilters);
-            clearFiltersBtn.addEventListener('click', clearFilters);
-                
-            // Категории
-            categoryBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const category = this.getAttribute('data-category');
-                    selectCategory(category);
-                });
-            });
-                
-            // Ценовой диапазон
-            priceRange.addEventListener('input', function() {
-                priceValue.textContent = `до ${parseInt(this.value).toLocaleString('ru-RU')} ₽`;
-            });
-            
-            // Обработчики формы оформления заказа
-            closeCheckoutBtn.addEventListener('click', closeCheckoutModal);
-            cancelCheckoutBtn.addEventListener('click', closeCheckoutModal);
-            
-            checkoutForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                processOrder();
-            });
-            
-            // Логотип - переход на главную
-            logo.addEventListener('click', () => showSection('catalog'));
-            
-            // Поиск товаров
-            searchForm.addEventListener('submit', function(e) {
-                e.preventDefault();
-                searchProducts();
-            });
-            
-            searchInput.addEventListener('input', function() {
-                searchProducts();
-            });
-            
-            // Функция переключения меню
-            function toggleSidebar() {
-                burgerBtn.classList.toggle('active');
-                sidebar.classList.toggle('open');
-                overlay.classList.toggle('active');
-                document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
-            }
-            
-            // Функция закрытия меню
-            function closeSidebar() {
-                burgerBtn.classList.remove('active');
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-            
-            // Переключение темы
-            function toggleTheme() {
-                const currentTheme = document.documentElement.getAttribute('data-theme');
-                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                localStorage.setItem('theme', newTheme);
-                
-                // Обновляем иконку
-                const icon = themeToggle.querySelector('i');
-                if (newTheme === 'dark') {
-                    icon.className = 'fas fa-sun';
-                } else {
-                    icon.className = 'fas fa-moon';
-                }
-            }
-            
+            let userOrders = JSON.parse(localStorage.getItem('userOrders')) || [];
+        
             // Инициализация темы
             function initTheme() {
                 const savedTheme = localStorage.getItem('theme') || 'light';
                 document.documentElement.setAttribute('data-theme', savedTheme);
-                
                 const icon = themeToggle.querySelector('i');
-                if (savedTheme === 'dark') {
-                    icon.className = 'fas fa-sun';
-                } else {
-                    icon.className = 'fas fa-moon';
+                icon.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        
+            // Обновление счетчиков
+            function updateCartCount() {
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                document.querySelectorAll('.cart-badge, .cart-side-badge').forEach(badge => {
+                    badge.textContent = totalItems;
+                    badge.style.display = totalItems > 0 ? 'flex' : 'none';
+                });
+            }
+        
+            function updateFavoritesCount() {
+                document.querySelectorAll('.favorites-badge, .favorites-side-badge').forEach(badge => {
+                    badge.textContent = favorites.length;
+                    badge.style.display = favorites.length > 0 ? 'flex' : 'none';
+                });
+            }
+        
+            // Работа с заказами
+            function loadUserOrders() {
+                const ordersContainer = document.getElementById('user-orders-list');
+                
+                if (userOrders.length === 0) {
+                    ordersContainer.innerHTML = `
+                        <div class="empty-orders">
+                            <i class="fas fa-inbox"></i>
+                            <p>У вас пока нет заказов</p>
+                        </div>
+                    `;
+                    return;
                 }
-            }
-            
-            // Фильтры
-            function openFiltersModal() {
-                filtersModal.classList.add('active');
-                document.body.style.overflow = 'hidden';
-            }
-            
-            function closeFiltersModal() {
-                filtersModal.classList.remove('active');
-                document.body.style.overflow = '';
-            }
-            
-            function applyFilters() {
-                const maxPrice = parseInt(priceRange.value);
-                const selectedBrands = [];
-                const selectedRatings = [];
-                
-                // Получаем выбранные бренды
-                document.querySelectorAll('#brandApple, #brandGoPro').forEach(checkbox => {
-                    if (checkbox.checked) {
-                        selectedBrands.push(checkbox.value);
-                    }
+        
+                ordersContainer.innerHTML = '<p class="loading">Загрузка заказов...</p>';
+        
+                userOrders.forEach(orderId => {
+                    database.ref('orders/' + orderId).once('value')
+                        .then(snapshot => {
+                            if (snapshot.exists()) {
+                                displayOrder(snapshot.val());
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Ошибка загрузки заказа:', error);
+                        });
                 });
+            }
+        
+            function displayOrder(order) {
+                const ordersContainer = document.getElementById('user-orders-list');
                 
-                // Получаем выбранные рейтинги
-                document.querySelectorAll('#rating45, #rating40').forEach(checkbox => {
-                    if (checkbox.checked) {
-                        selectedRatings.push(parseFloat(checkbox.value));
-                    }
-                });
-                
-                // Фильтруем товары
-                let filtered = products.filter(product => {
-                    // Фильтр по цене
-                    if (product.price > maxPrice) return false;
-                    
-                    // Фильтр по бренду
-                    if (selectedBrands.length > 0) {
-                        const productBrand = product.name.includes('Apple') ? 'Apple' : 
-                                          product.name.includes('GoPro') ? 'GoPro' : '';
-                        if (!selectedBrands.includes(productBrand)) return false;
-                    }
-                    
-                    // Фильтр по рейтингу
-                    if (selectedRatings.length > 0) {
-                        const meetsRating = selectedRatings.some(rating => product.rating >= rating);
-                        if (!meetsRating) return false;
-                    }
-                    
-                    return true;
-                });
-                
-                // Сортировка
-                const sortType = document.getElementById('sortFilter').value;
-                switch (sortType) {
-                    case 'price-low':
-                        filtered.sort((a, b) => a.price - b.price);
-                        break;
-                    case 'price-high':
-                        filtered.sort((a, b) => b.price - a.price);
-                        break;
-                    case 'rating':
-                        filtered.sort((a, b) => b.rating - a.rating);
-                        break;
-                    case 'name':
-                    default:
-                        filtered.sort((a, b) => a.name.localeCompare(b.name));
-                        break;
+                if (ordersContainer.querySelector('.loading')) {
+                    ordersContainer.innerHTML = '';
                 }
+        
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
+                orderCard.innerHTML = `
+                    <div class="order-header">
+                        <span class="order-id">Заказ #${order.orderId || 'N/A'}</span>
+                        <span class="order-date">${formatDate(order.orderDate)}</span>
+                    </div>
+                    <div class="order-status ${getStatusClass(order.status)}">
+                        ${getStatusText(order.status)}
+                    </div>
+                    <div class="order-timeline">
+                        ${renderTimeline(order.status)}
+                    </div>
+                    <div class="order-items">
+                        ${renderOrderItems(order.items)}
+                    </div>
+                    <div class="order-total">
+                        Итого: ${order.total.toLocaleString('ru-RU')} ₽
+                    </div>
+                `;
                 
-                renderProducts(filtered, productsContainer);
-                closeFiltersModal();
-                showNotification(`Найдено товаров: ${filtered.length}`);
+                ordersContainer.appendChild(orderCard);
             }
-            
-            function clearFilters() {
-                // Сбрасываем все чекбоксы
-                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
-                
-                // Сбрасываем цену
-                priceRange.value = 150000;
-                priceValue.textContent = 'до 150 000 ₽';
-                
-                // Сбрасываем сортировку
-                document.getElementById('sortFilter').value = 'name';
-                
-                // Показываем все товары
-                renderProducts(products, productsContainer);
-                showNotification('Фильтры сброшены');
+        
+            // Вспомогательные функции для заказов
+            function formatDate(dateString) {
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                return new Date(dateString).toLocaleDateString('ru-RU', options);
             }
-            
-            function selectCategory(category) {
-                // Убираем активный класс у всех кнопок
-                categoryBtns.forEach(btn => btn.classList.remove('active'));
-                
-                // Добавляем активный класс к выбранной кнопке
-                event.target.closest('.category-btn').classList.add('active');
-                
-                let filtered = products;
-                
-                switch (category) {
-                    case 'smartphones':
-                        filtered = products.filter(p => p.name.toLowerCase().includes('iphone') || p.name.toLowerCase().includes('смартфон'));
-                        break;
-                    case 'headphones':
-                        filtered = products.filter(p => p.name.toLowerCase().includes('airpods') || p.name.toLowerCase().includes('наушники'));
-                        break;
-                    case 'laptops':
-                        filtered = products.filter(p => p.name.toLowerCase().includes('macbook') || p.name.toLowerCase().includes('ноутбук'));
-                        break;
-                    case 'watches':
-                        filtered = products.filter(p => p.name.toLowerCase().includes('watch') || p.name.toLowerCase().includes('часы'));
-                        break;
-                    case 'tablets':
-                        filtered = products.filter(p => p.name.toLowerCase().includes('ipad') || p.name.toLowerCase().includes('планшет'));
-                        break;
-                    case 'cameras':
-                        filtered = products.filter(p => p.name.toLowerCase().includes('gopro') || p.name.toLowerCase().includes('камера'));
-                        break;
-                    case 'all':
-                    default:
-                        filtered = products;
-                        break;
-                }
-                
-                renderProducts(filtered, productsContainer);
-                showNotification(`Категория: ${event.target.closest('.category-btn').textContent.trim()}`);
+        
+            function getStatusClass(status) {
+                const statusMap = {
+                    'new': 'status-new',
+                    'processing': 'status-processing',
+                    'shipped': 'status-shipped',
+                    'delivered': 'status-delivered',
+                    'cancelled': 'status-cancelled'
+                };
+                return statusMap[status] || 'status-new';
             }
-            
-            // Переключение разделов
-            function showSection(sectionId) {
-                contentSections.forEach(section => {
-                    section.classList.remove('active');
-                });
-                document.getElementById(sectionId).classList.add('active');
-                
-                // Обновляем контент при переходе
-                if (sectionId === 'cart') {
-                    renderCart();
-                } else if (sectionId === 'favorites') {
-                    renderFavorites();
-                }
+        
+            function getStatusText(status) {
+                const statusMap = {
+                    'new': 'Новый',
+                    'processing': 'В обработке',
+                    'shipped': 'Отправлен',
+                    'delivered': 'Доставлен',
+                    'cancelled': 'Отменен'
+                };
+                return statusMap[status] || 'Новый';
             }
-            
+        
+            function renderTimeline(status) {
+                const steps = [
+                    { id: 'new', text: 'Заказ создан', active: true },
+                    { id: 'processing', text: 'В обработке', active: ['processing', 'shipped', 'delivered'].includes(status) },
+                    { id: 'shipped', text: 'Отправлен', active: ['shipped', 'delivered'].includes(status) },
+                    { id: 'delivered', text: 'Доставлен', active: status === 'delivered' }
+                ];
+                
+                return steps.map(step => `
+                    <div class="timeline-step ${step.active ? 'active' : ''}">
+                        <div class="timeline-text">${step.text}</div>
+                        ${step.active ? `<div class="timeline-date">${new Date().toLocaleDateString('ru-RU')}</div>` : ''}
+                    </div>
+                `).join('');
+            }
+        
+            function renderOrderItems(items) {
+                if (!items || items.length === 0) return '<p>Нет информации о товарах</p>';
+                
+                return items.map(item => `
+                    <div class="order-item">
+                        <img src="${item.image}" alt="${item.name}" width="50">
+                        <span>${item.name}</span>
+                        <span>${item.quantity} × ${item.price.toLocaleString('ru-RU')} ₽</span>
+                    </div>
+                `).join('');
+            }
+        
             // Рендер товаров
             function renderProducts(productsArray, container) {
                 container.innerHTML = '';
@@ -2587,10 +2460,9 @@
                     container.appendChild(productCard);
                 });
                 
-                // Добавляем обработчики событий
                 addProductEventListeners();
             }
-            
+        
             // Рендер рейтинга
             function renderRating(rating) {
                 let stars = '';
@@ -2609,7 +2481,7 @@
                 
                 return stars + ` <span style="font-size: 13px; color: var(--gray);">${rating}</span>`;
             }
-            
+        
             // Рендер избранного
             function renderFavorites() {
                 const favoriteProducts = products.filter(p => favorites.includes(p.id));
@@ -2624,7 +2496,7 @@
                     `;
                 }
             }
-            
+        
             // Рендер корзины
             function renderCart() {
                 cartContent.innerHTML = '';
@@ -2712,7 +2584,7 @@
                 // Оформление заказа
                 document.querySelector('.checkout-btn')?.addEventListener('click', checkout);
             }
-            
+        
             // Применение промокода
             function applyPromoCode() {
                 const promoCodeInput = document.getElementById('promoCodeInput');
@@ -2731,7 +2603,7 @@
                     showNotification('Неверный промокод', 'error');
                 }
             }
-            
+        
             // Добавление обработчиков событий для товаров
             function addProductEventListeners() {
                 // Кнопка "Купить"
@@ -2752,7 +2624,7 @@
                     });
                 });
             }
-            
+        
             // Добавление в корзину
             function addToCart(productId) {
                 const product = products.find(p => p.id === productId);
@@ -2785,7 +2657,7 @@
                     }, 2000);
                 }
             }
-            
+        
             // Обновление корзины
             function updateCart(productId, action) {
                 const itemIndex = cart.findIndex(item => item.id === productId);
@@ -2814,7 +2686,7 @@
                     showNotification('Корзина обновлена');
                 }
             }
-            
+        
             // Переключение избранного
             function toggleFavorite(productId, button) {
                 const index = favorites.indexOf(productId);
@@ -2843,7 +2715,7 @@
                     renderFavorites();
                 }
             }
-            
+        
             // Поиск товаров
             function searchProducts() {
                 const searchInput = document.getElementById('searchInput');
@@ -2902,7 +2774,7 @@
                     showNotification('Товары не найдены', 'error');
                 }
             }
-            
+        
             // Оформление заказа
             function checkout() {
                 if (cart.length === 0) {
@@ -2927,13 +2799,13 @@
                 checkoutModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
             }
-            
+        
             function closeCheckoutModal() {
                 checkoutModal.classList.remove('active');
                 document.body.style.overflow = '';
                 checkoutForm.reset();
             }
-            
+        
             function processOrder() {
                 const formData = new FormData(checkoutForm);
                 const orderData = {
@@ -2954,15 +2826,19 @@
                     }, 0),
                     discount: promoCodeApplied ? discount : 0,
                     total: parseFloat(checkoutTotal.textContent.replace(/[^\d.]/g, '')),
-                    orderDate: new Date().toISOString(),
+                    orderDate: new Date().toLocaleString('ru-RU'),
                     orderId: 'ORD-' + Date.now(),
-                    status: 'Новый'
+                    status: 'new'
                 };
                 
                 // Сохраняем заказ в Firebase
-                const ordersRef = database.ref('orders');
-                ordersRef.push(orderData)
+                const newOrderRef = database.ref('orders').push();
+                newOrderRef.set(orderData)
                     .then(() => {
+                        // Сохраняем ID заказа
+                        userOrders.push(newOrderRef.key);
+                        localStorage.setItem('userOrders', JSON.stringify(userOrders));
+                        
                         // Очищаем корзину
                         cart = [];
                         promoCodeApplied = false;
@@ -2982,25 +2858,7 @@
                         showNotification('Ошибка при оформлении заказа', 'error');
                     });
             }
-            
-            // Обновление счетчика корзины
-            function updateCartCount() {
-                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-                
-                document.querySelectorAll('.cart-badge, .cart-side-badge').forEach(badge => {
-                    badge.textContent = totalItems;
-                    badge.style.display = totalItems > 0 ? 'flex' : 'none';
-                });
-            }
-            
-            // Обновление счетчика избранного
-            function updateFavoritesCount() {
-                document.querySelectorAll('.favorites-badge, .favorites-side-badge').forEach(badge => {
-                    badge.textContent = favorites.length;
-                    badge.style.display = favorites.length > 0 ? 'flex' : 'none';
-                });
-            }
-            
+        
             // Показ уведомлений
             function showNotification(message, type = 'success') {
                 notificationMessage.textContent = message;
@@ -3011,135 +2869,233 @@
                     notification.classList.remove('show');
                 }, 3000);
             }
-        });
-
-        // ====== Полный код для работы с заказами ======
-        document.addEventListener('DOMContentLoaded', function() {
-          // Проверяем, есть ли заказы у пользователя при загрузке страницы
-          checkUserOrders();
-        });
         
-        // Функция проверки и загрузки заказов
-        function checkUserOrders() {
-          const userOrders = JSON.parse(localStorage.getItem('userOrders')) || [];
-          if (userOrders.length > 0) {
-            loadOrders(userOrders);
-          } else {
-            showEmptyOrders();
-          }
-        }
+            // Переключение разделов
+            function showSection(sectionId) {
+                contentSections.forEach(section => {
+                    section.classList.remove('active');
+                });
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Обновляем контент при переходе
+                if (sectionId === 'cart') {
+                    renderCart();
+                } else if (sectionId === 'favorites') {
+                    renderFavorites();
+                } else if (sectionId === 'orders') {
+                    loadUserOrders();
+                }
+            }
         
-        // Загрузка заказов из Firebase
-        function loadOrders(orderIds) {
-          const ordersContainer = document.getElementById('user-orders-list');
-          ordersContainer.innerHTML = '<p>Загрузка ваших заказов...</p>';
+            // Бургер-меню
+            function toggleSidebar() {
+                burgerBtn.classList.toggle('active');
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+                document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+            }
         
-          orderIds.forEach(orderId => {
-            const orderRef = firebase.database().ref('orders/' + orderId);
-            orderRef.once('value').then(snapshot => {
-              if (snapshot.exists()) {
-                displayOrderCard(snapshot.val());
-              }
+            function closeSidebar() {
+                burgerBtn.classList.remove('active');
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        
+            // Переключение темы
+            function toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                const icon = themeToggle.querySelector('i');
+                icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        
+            // Фильтры
+            function openFiltersModal() {
+                filtersModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+        
+            function closeFiltersModal() {
+                filtersModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        
+            function applyFilters() {
+                const maxPrice = parseInt(priceRange.value);
+                const selectedBrands = [];
+                const selectedRatings = [];
+                
+                // Получаем выбранные бренды
+                document.querySelectorAll('#brandApple, #brandGoPro').forEach(checkbox => {
+                    if (checkbox.checked) {
+                        selectedBrands.push(checkbox.value);
+                    }
+                });
+                
+                // Получаем выбранные рейтинги
+                document.querySelectorAll('#rating45, #rating40').forEach(checkbox => {
+                    if (checkbox.checked) {
+                        selectedRatings.push(parseFloat(checkbox.value));
+                    }
+                });
+                
+                // Фильтруем товары
+                let filtered = products.filter(product => {
+                    // Фильтр по цене
+                    if (product.price > maxPrice) return false;
+                    
+                    // Фильтр по бренду
+                    if (selectedBrands.length > 0) {
+                        const productBrand = product.name.includes('Apple') ? 'Apple' : 
+                                          product.name.includes('GoPro') ? 'GoPro' : '';
+                        if (!selectedBrands.includes(productBrand)) return false;
+                    }
+                    
+                    // Фильтр по рейтингу
+                    if (selectedRatings.length > 0) {
+                        const meetsRating = selectedRatings.some(rating => product.rating >= rating);
+                        if (!meetsRating) return false;
+                    }
+                    
+                    return true;
+                });
+                
+                // Сортировка
+                const sortType = document.getElementById('sortFilter').value;
+                switch (sortType) {
+                    case 'price-low':
+                        filtered.sort((a, b) => a.price - b.price);
+                        break;
+                    case 'price-high':
+                        filtered.sort((a, b) => b.price - a.price);
+                        break;
+                    case 'rating':
+                        filtered.sort((a, b) => b.rating - a.rating);
+                        break;
+                    case 'name':
+                    default:
+                        filtered.sort((a, b) => a.name.localeCompare(b.name));
+                        break;
+                }
+                
+                renderProducts(filtered, productsContainer);
+                closeFiltersModal();
+                showNotification(`Найдено товаров: ${filtered.length}`);
+            }
+        
+            function clearFilters() {
+                // Сбрасываем все чекбоксы
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+                
+                // Сбрасываем цену
+                priceRange.value = 150000;
+                priceValue.textContent = 'до 150 000 ₽';
+                
+                // Сбрасываем сортировку
+                document.getElementById('sortFilter').value = 'name';
+                
+                // Показываем все товары
+                renderProducts(products, productsContainer);
+                showNotification('Фильтры сброшены');
+            }
+        
+            function selectCategory(category) {
+                // Убираем активный класс у всех кнопок
+                categoryBtns.forEach(btn => btn.classList.remove('active'));
+                
+                // Добавляем активный класс к выбранной кнопке
+                event.target.closest('.category-btn').classList.add('active');
+                
+                let filtered = products;
+                
+                switch (category) {
+                    case 'smartphones':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('iphone') || p.name.toLowerCase().includes('смартфон'));
+                        break;
+                    case 'headphones':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('airpods') || p.name.toLowerCase().includes('наушники'));
+                        break;
+                    case 'laptops':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('macbook') || p.name.toLowerCase().includes('ноутбук'));
+                        break;
+                    case 'watches':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('watch') || p.name.toLowerCase().includes('часы'));
+                        break;
+                    case 'tablets':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('ipad') || p.name.toLowerCase().includes('планшет'));
+                        break;
+                    case 'cameras':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('gopro') || p.name.toLowerCase().includes('камера'));
+                        break;
+                    case 'all':
+                    default:
+                        filtered = products;
+                        break;
+                }
+                
+                renderProducts(filtered, productsContainer);
+                showNotification(`Категория: ${event.target.closest('.category-btn').textContent.trim()}`);
+            }
+        
+            // Инициализация
+            initTheme();
+            updateCartCount();
+            updateFavoritesCount();
+            renderProducts(products, productsContainer);
+            renderFavorites();
+            renderCart();
+        
+            // Обработчики событий
+            burgerBtn.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', closeSidebar);
+            cartBtn.addEventListener('click', () => showSection('cart'));
+            favoritesBtn.addEventListener('click', () => showSection('favorites'));
+            themeToggle.addEventListener('click', toggleTheme);
+            filtersBtn.addEventListener('click', openFiltersModal);
+            closeFiltersBtn.addEventListener('click', closeFiltersModal);
+            applyFiltersBtn.addEventListener('click', applyFilters);
+            clearFiltersBtn.addEventListener('click', clearFilters);
+            priceRange.addEventListener('input', function() {
+                priceValue.textContent = `до ${parseInt(this.value).toLocaleString('ru-RU')} ₽`;
             });
-          });
-        }
+            closeCheckoutBtn.addEventListener('click', closeCheckoutModal);
+            cancelCheckoutBtn.addEventListener('click', closeCheckoutModal);
+            checkoutForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                processOrder();
+            });
+            logo.addEventListener('click', () => showSection('catalog'));
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchProducts();
+            });
+            searchInput.addEventListener('input', searchProducts);
         
-        // Отображение карточки заказа
-        function displayOrderCard(order) {
-          const ordersContainer = document.getElementById('user-orders-list');
-          
-          // Очищаем сообщение о загрузке при первом заказе
-          if (ordersContainer.innerHTML.includes('Загрузка')) {
-            ordersContainer.innerHTML = '';
-          }
+            // Навигация по меню
+            menuLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const sectionId = this.getAttribute('data-section');
+                    showSection(sectionId);
+                    closeSidebar();
+                });
+            });
         
-          const orderCard = document.createElement('div');
-          orderCard.className = 'order-card';
-          orderCard.innerHTML = `
-            <div class="order-header">
-              <span class="order-id">Заказ #${order.orderId || 'N/A'}</span>
-              <span class="order-date">${formatDate(order.orderDate)}</span>
-            </div>
-            <div class="order-status ${getStatusClass(order.status)}">
-              ${getStatusText(order.status)}
-            </div>
-            <div class="order-items">
-              ${renderItems(order.items)}
-            </div>
-            <div class="order-total">
-              Итого: ${order.total.toLocaleString('ru-RU')} ₽
-            </div>
-          `;
-          
-          ordersContainer.appendChild(orderCard);
-        }
-        
-        // Форматирование даты
-        function formatDate(dateString) {
-          const options = { day: 'numeric', month: 'long', year: 'numeric' };
-          return new Date(dateString).toLocaleDateString('ru-RU', options);
-        }
-        
-        // Получение класса для статуса
-        function getStatusClass(status) {
-          const statusClasses = {
-            'new': 'status-new',
-            'processing': 'status-processing',
-            'shipped': 'status-shipped',
-            'delivered': 'status-delivered',
-            'cancelled': 'status-cancelled'
-          };
-          return statusClasses[status] || 'status-new';
-        }
-        
-        // Получение текста статуса
-        function getStatusText(status) {
-          const statusTexts = {
-            'new': 'Новый',
-            'processing': 'В обработке',
-            'shipped': 'Отправлен',
-            'delivered': 'Доставлен',
-            'cancelled': 'Отменен'
-          };
-          return statusTexts[status] || 'Новый';
-        }
-        
-        // Отрисовка товаров в заказе
-        function renderItems(items) {
-          if (!items || items.length === 0) {
-            return '<p>Нет информации о товарах</p>';
-          }
-        
-          return items.map(item => `
-            <div class="order-item">
-              <img src="${item.image}" alt="${item.name}" width="50">
-              <span>${item.name}</span>
-              <span>${item.quantity} × ${item.price.toLocaleString('ru-RU')} ₽</span>
-            </div>
-          `).join('');
-        }
-        
-        // Показ пустого состояния
-        function showEmptyOrders() {
-          document.getElementById('user-orders-list').innerHTML = `
-            <div class="empty-orders">
-              <i class="fas fa-inbox"></i>
-              <p>У вас пока нет заказов</p>
-            </div>
-          `;
-        }
-        
-        // Обработчик перехода в раздел заказов
-        function showOrdersSection() {
-          document.querySelectorAll('.content-section').forEach(section => {
-            section.classList.remove('active');
-          });
-          document.getElementById('orders').classList.add('active');
-          checkUserOrders();
-        }
-        
-        // Назначаем обработчик на кнопку меню
-        document.querySelector('[data-section="orders"]').addEventListener('click', showOrdersSection);
+            // Категории
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const category = this.getAttribute('data-category');
+                    selectCategory(category);
+                });
+            });
+        });
     </script>
 </body>
 </html>
+
