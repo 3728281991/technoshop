@@ -2069,7 +2069,7 @@
     </main>
 
     <script>
-        // Инициализация Firebase
+                // Инициализация Firebase
         firebase.initializeApp({
             apiKey: "AIzaSyBl4ipzmgL24rjjUDXXHLImjqKRTJFspDQ",
             authDomain: "technoshop-a1e0e.firebaseapp.com",
@@ -2080,32 +2080,31 @@
             appId: "1:802053670431:web:bb330eefe24751ce5f772a"
         });
         
+        // Получаем ссылку на базу данных
         const database = firebase.database();
         
         // Данные товаров
         const products = [
             {
                 id: 1,
-                name: "Кроссовки Adidas Gazelle",
+                name: "Кросовки Adiddas Gazelle",
                 price: 1990,
                 oldPrice: 2500,
                 image: "https://i.postimg.cc/hv2nzGgV/5300739128398310372.jpg",
                 rating: 5.0,
                 badge: "Хит",
                 inStock: true,
-                isPromo: false,
-                category: "sneakers"
+                isPromo: false
             },
             {
                 id: 2,
-                name: "Кроссовки Nike",
+                name: "Кросовки Nike",
                 price: 2100,
                 image: "https://i.postimg.cc/dDPqKVRF/5300739128398310340.jpg",
                 rating: 4.7,
                 badge: "Скидка",
                 inStock: true,
-                isPromo: true,
-                category: "sneakers"
+                isPromo: true
             },
             {
                 id: 3,
@@ -2115,8 +2114,7 @@
                 rating: 4.6,
                 badge: "Новинка",
                 inStock: false,
-                isPromo: true,
-                category: "watches"
+                isPromo: true
             },
             {
                 id: 4,
@@ -2125,8 +2123,7 @@
                 image: "https://i.postimg.cc/2yfzs57D/5301173731844027770.jpg",
                 rating: 4.7,
                 inStock: true,
-                isPromo: false,
-                category: "watches"
+                isPromo: false
             },
             {
                 id: 5,
@@ -2136,8 +2133,7 @@
                 image: "https://i.postimg.cc/wjPdKv9G/5301256040597288988.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "watches"
+                isPromo: true
             },
             {
                 id: 6,
@@ -2147,8 +2143,7 @@
                 image: "https://i.postimg.cc/WpnLNS2r/5298683007294634228.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "watches"
+                isPromo: true
             },
             {
                 id: 7,
@@ -2157,18 +2152,16 @@
                 image: "https://i.postimg.cc/CL1tFgrT/5298683007294634161.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "watches"
+                isPromo: true
             },
             {
                 id: 8,
-                name: "Часы HK 10 Pro Max",
+                name: "Часы Hk 10 pro max",
                 price: 2750,
                 image: "https://i.postimg.cc/dQWHNfsW/5447320113033379628.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "watches"
+                isPromo: true
             },
             {
                 id: 9,
@@ -2178,30 +2171,27 @@
                 image: "https://i.postimg.cc/Qtvbs2Fs/5454302046229492052.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "headphones"
+                isPromo: true
             },
             {
                 id: 10,
-                name: "Часы HK 9 Mini +",
+                name: "Часы Hk 9 mini +",
                 price: 3499,
                 oldPrice: 2000,
                 image: "https://i.postimg.cc/1RNBM3dz/5454302046229492044.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "watches"
+                isPromo: true
             },
             {
                 id: 11,
-                name: "Геймпад PS 4",
+                name: "Геймпад Ps 4",
                 price: 1699,
                 oldPrice: 2000,
                 image: "https://i.postimg.cc/K8QD4k10/5454302046229492027.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "gaming"
+                isPromo: true
             },
             {
                 id: 12,
@@ -2211,8 +2201,7 @@
                 image: "https://i.postimg.cc/PqxzDXZT/5454302046229492005.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "headphones"
+                isPromo: true
             },
             {
                 id: 13,
@@ -2222,8 +2211,7 @@
                 image: "https://i.postimg.cc/wBG5cCcJ/5454302046229491984.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "headphones"
+                isPromo: true
             },
             {
                 id: 14,
@@ -2232,8 +2220,7 @@
                 image: "https://i.postimg.cc/nr8vNqWh/5341661228902248718.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true,
-                category: "headphones"
+                isPromo: true
             }
         ];
         
@@ -2244,23 +2231,18 @@
                 discount: 0.1,
                 description: 'Скидка 10% на весь заказ',
                 active: true
-            },
-            {
-                code: 'SUMMER20',
-                discount: 0.2,
-                description: 'Скидка 20% на летнюю коллекцию',
-                active: true
             }
         ];
         
-        // Основное приложение
+        // Инициализация при загрузке страницы
         document.addEventListener('DOMContentLoaded', function() {
-            // DOM элементы
+            // Получаем элементы DOM
             const burgerBtn = document.querySelector('.burger-btn');
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
             const cartBtn = document.querySelector('.cart-btn');
             const favoritesBtn = document.querySelector('.favorites-btn');
+            const searchContainer = document.getElementById('searchContainer');
             const searchForm = document.getElementById('searchForm');
             const searchInput = document.getElementById('searchInput');
             const productsContainer = document.getElementById('productsContainer');
@@ -2285,24 +2267,13 @@
             const cancelCheckoutBtn = document.getElementById('cancelCheckoutBtn');
             const checkoutForm = document.getElementById('checkoutForm');
             const checkoutTotal = document.getElementById('checkoutTotal');
-            const orderStatusFilter = document.getElementById('orderStatusFilter');
         
-            // Состояние приложения
+            // Инициализация данных
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
             let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
             let promoCodeApplied = false;
             let discount = 0;
             let userOrders = JSON.parse(localStorage.getItem('userOrders')) || [];
-            const orderListeners = {};
-            let currentFilters = {
-                category: 'all',
-                price: 150000,
-                brands: [],
-                ratings: [],
-                sort: 'name',
-                inStock: false,
-                isPromo: false
-            };
         
             // Инициализация темы
             function initTheme() {
@@ -2328,57 +2299,49 @@
                 });
             }
         
-            // ========== РАБОТА С ЗАКАЗАМИ ==========
-            function loadAndTrackUserOrders() {
+            // Работа с заказами
+            function loadUserOrders() {
                 const ordersContainer = document.getElementById('user-orders-list');
-                const statusFilter = orderStatusFilter.value;
                 
-                // Очистка предыдущих слушателей
-                Object.keys(orderListeners).forEach(orderId => {
-                    database.ref('orders/' + orderId).off('value', orderListeners[orderId]);
-                    delete orderListeners[orderId];
-                });
-        
                 if (userOrders.length === 0) {
                     ordersContainer.innerHTML = `
                         <div class="empty-orders">
                             <i class="fas fa-inbox"></i>
                             <p>У вас пока нет заказов</p>
-                        </div>`;
+                        </div>
+                    `;
                     return;
                 }
-        
+            
                 ordersContainer.innerHTML = '<p class="loading">Загрузка заказов...</p>';
-        
-                // Добавляем слушатели для каждого заказа с учетом фильтра
+                
+                // Удаляем все предыдущие слушатели
                 userOrders.forEach(orderId => {
-                    orderListeners[orderId] = database.ref('orders/' + orderId).on('value', snapshot => {
+                    database.ref('orders/' + orderId).off('value');
+                });
+            
+                // Добавляем слушатели для каждого заказа
+                userOrders.forEach(orderId => {
+                    database.ref('orders/' + orderId).on('value', snapshot => {
                         if (snapshot.exists()) {
-                            const order = snapshot.val();
-                            if (statusFilter === 'all' || order.status === statusFilter) {
-                                updateOrderCard(order, orderId);
-                            }
+                            updateOrderCard(snapshot.val(), orderId);
                         }
-                    }, error => {
-                        console.error('Ошибка загрузки заказа:', error);
                     });
                 });
             }
         
-            function updateOrderCard(order, orderId) {
-                let orderCard = document.getElementById(`order-${orderId}`);
-                const wasEmpty = !orderCard;
+            function displayOrder(order) {
+                const ordersContainer = document.getElementById('user-orders-list');
                 
-                if (wasEmpty) {
-                    orderCard = document.createElement('div');
-                    orderCard.className = 'order-card';
-                    orderCard.id = `order-${orderId}`;
-                    document.getElementById('user-orders-list').appendChild(orderCard);
+                if (ordersContainer.querySelector('.loading')) {
+                    ordersContainer.innerHTML = '';
                 }
         
+                const orderCard = document.createElement('div');
+                orderCard.className = 'order-card';
                 orderCard.innerHTML = `
                     <div class="order-header">
-                        <span class="order-id">Заказ #${order.orderId || orderId}</span>
+                        <span class="order-id">Заказ #${order.orderId || 'N/A'}</span>
                         <span class="order-date">${formatDate(order.orderDate)}</span>
                     </div>
                     <div class="order-status ${getStatusClass(order.status)}">
@@ -2392,44 +2355,15 @@
                     </div>
                     <div class="order-total">
                         Итого: ${order.total.toLocaleString('ru-RU')} ₽
-                        ${order.discount > 0 ? `<span class="order-discount">(скидка ${order.discount * 100}%)</span>` : ''}
                     </div>
-                    ${order.status === 'new' ? `
-                    <button class="cancel-order-btn" data-order-id="${orderId}">
-                        Отменить заказ
-                    </button>` : ''}
                 `;
                 
-                // Обработчик кнопки отмены заказа
-                orderCard.querySelector('.cancel-order-btn')?.addEventListener('click', function() {
-                    cancelOrder(this.getAttribute('data-order-id'));
-                });
-        
-                // Плавное появление нового заказа
-                if (wasEmpty) {
-                    orderCard.style.opacity = 0;
-                    setTimeout(() => {
-                        orderCard.style.transition = 'opacity 0.3s';
-                        orderCard.style.opacity = 1;
-                    }, 10);
-                }
+                ordersContainer.appendChild(orderCard);
             }
         
-            function cancelOrder(orderId) {
-                if (confirm('Вы уверены, что хотите отменить этот заказ?')) {
-                    database.ref('orders/' + orderId).update({ status: 'cancelled' })
-                        .then(() => {
-                            showNotification('Заказ успешно отменен', 'success');
-                        })
-                        .catch(error => {
-                            console.error('Ошибка при отмене заказа:', error);
-                            showNotification('Не удалось отменить заказ', 'error');
-                        });
-                }
-            }
-        
+            // Вспомогательные функции для заказов
             function formatDate(dateString) {
-                const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+                const options = { day: 'numeric', month: 'long', year: 'numeric' };
                 return new Date(dateString).toLocaleDateString('ru-RU', options);
             }
         
@@ -2465,12 +2399,8 @@
                 
                 return steps.map(step => `
                     <div class="timeline-step ${step.active ? 'active' : ''}">
-                        <div class="timeline-dot"></div>
-                        <div class="timeline-line"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-text">${step.text}</div>
-                            ${step.active ? `<div class="timeline-date">${new Date().toLocaleDateString('ru-RU')}</div>` : ''}
-                        </div>
+                        <div class="timeline-text">${step.text}</div>
+                        ${step.active ? `<div class="timeline-date">${new Date().toLocaleDateString('ru-RU')}</div>` : ''}
                     </div>
                 `).join('');
             }
@@ -2478,36 +2408,21 @@
             function renderOrderItems(items) {
                 if (!items || items.length === 0) return '<p>Нет информации о товарах</p>';
                 
-                return items.slice(0, 3).map(item => `
+                return items.map(item => `
                     <div class="order-item">
                         <img src="${item.image}" alt="${item.name}" width="50">
-                        <div class="order-item-info">
-                            <span class="order-item-name">${item.name}</span>
-                            <span class="order-item-price">${item.quantity} × ${item.price.toLocaleString('ru-RU')} ₽</span>
-                        </div>
+                        <span>${item.name}</span>
+                        <span>${item.quantity} × ${item.price.toLocaleString('ru-RU')} ₽</span>
                     </div>
-                `).join('') + 
-                (items.length > 3 ? `<div class="order-more-items">+${items.length - 3} еще</div>` : '');
+                `).join('');
             }
         
-            function clearOrderListeners() {
-                Object.keys(orderListeners).forEach(orderId => {
-                    database.ref('orders/' + orderId).off('value', orderListeners[orderId]);
-                    delete orderListeners[orderId];
-                });
-            }
-        
-            // ========== ОСНОВНЫЕ ФУНКЦИИ МАГАЗИНА ==========
+            // Рендер товаров
             function renderProducts(productsArray, container) {
                 container.innerHTML = '';
                 
                 if (productsArray.length === 0) {
-                    container.innerHTML = `
-                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
-                            <i class="fas fa-search" style="font-size: 40px; color: #4361ee; margin-bottom: 15px;"></i>
-                            <p style="color: #64748b; font-size: 16px;">Товары не найдены</p>
-                            <button class="btn clear-filters-btn" onclick="clearFilters()">Сбросить фильтры</button>
-                        </div>`;
+                    container.innerHTML = '<p style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">Товары не найдены</p>';
                     return;
                 }
                 
@@ -2515,15 +2430,13 @@
                     const isFavorite = favorites.includes(product.id);
                     const cartItem = cart.find(item => item.id === product.id);
                     const quantity = cartItem ? cartItem.quantity : 0;
-                    const outOfStock = !product.inStock;
                     
                     const productCard = document.createElement('div');
-                    productCard.className = `product-card ${outOfStock ? 'out-of-stock' : ''}`;
+                    productCard.className = 'product-card';
                     productCard.innerHTML = `
-                        ${product.badge ? `<div class="product-badge ${product.badge.toLowerCase()}">${product.badge}</div>` : ''}
+                        ${product.badge ? `<div class="product-badge">${product.badge}</div>` : ''}
                         <div class="product-image">
                             <img src="${product.image}" alt="${product.name}" loading="lazy">
-                            ${outOfStock ? '<div class="out-of-stock-label">Нет в наличии</div>' : ''}
                         </div>
                         <div class="product-info">
                             <h3 class="product-name">${product.name}</h3>
@@ -2536,8 +2449,8 @@
                             </div>
                         </div>
                         <div class="product-actions">
-                            <button class="buy-btn ${outOfStock ? 'disabled' : ''}" data-id="${product.id}" ${outOfStock ? 'disabled' : ''}>
-                                <i class="fas fa-shopping-cart"></i> ${outOfStock ? 'Нет в наличии' : 'Купить'}
+                            <button class="buy-btn" data-id="${product.id}">
+                                <i class="fas fa-shopping-cart"></i> Купить
                             </button>
                             <button class="action-btn favorite-btn ${isFavorite ? 'active' : ''}" 
                                     data-id="${product.id}"
@@ -2552,6 +2465,7 @@
                 addProductEventListeners();
             }
         
+            // Рендер рейтинга
             function renderRating(rating) {
                 let stars = '';
                 const fullStars = Math.floor(rating);
@@ -2567,9 +2481,10 @@
                     }
                 }
                 
-                return stars + ` <span class="rating-value">${rating}</span>`;
+                return stars + ` <span style="font-size: 13px; color: var(--gray);">${rating}</span>`;
             }
         
+            // Рендер избранного
             function renderFavorites() {
                 const favoriteProducts = products.filter(p => favorites.includes(p.id));
                 renderProducts(favoriteProducts, favoritesGrid);
@@ -2579,12 +2494,12 @@
                         <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px;">
                             <i class="fas fa-heart" style="font-size: 40px; color: #f72585; margin-bottom: 15px;"></i>
                             <p style="color: #64748b; font-size: 16px;">В избранном пока ничего нет</p>
-                            <button class="btn" onclick="showSection('catalog')">Перейти в каталог</button>
                         </div>
                     `;
                 }
             }
         
+            // Рендер корзины
             function renderCart() {
                 cartContent.innerHTML = '';
                 
@@ -2593,14 +2508,12 @@
                         <div style="text-align: center; padding: 40px 20px;">
                             <i class="fas fa-shopping-cart" style="font-size: 40px; color: #4361ee; margin-bottom: 15px;"></i>
                             <p style="color: #64748b; font-size: 16px;">Ваша корзина пуста</p>
-                            <button class="btn" onclick="showSection('catalog')">Перейти в каталог</button>
                         </div>
                     `;
                     return;
                 }
                 
                 let subtotal = 0;
-                let discountAmount = 0;
                 
                 cart.forEach(item => {
                     const product = products.find(p => p.id === item.id);
@@ -2634,8 +2547,7 @@
                 
                 let total = subtotal;
                 if (promoCodeApplied) {
-                    discountAmount = subtotal * discount;
-                    total = subtotal - discountAmount;
+                    total = subtotal * (1 - discount);
                 }
                 
                 cartSummary.innerHTML = `
@@ -2650,18 +2562,11 @@
                         <span>Итого:</span>
                         <span>${total.toLocaleString('ru-RU')} ₽</span>
                     </div>
-                    ${promoCodeApplied ? `
-                    <div class="cart-subtotal">
-                        <span>Сумма:</span>
-                        <span>${subtotal.toLocaleString('ru-RU')} ₽</span>
-                    </div>
-                    <div class="cart-discount">
-                        <span>Скидка:</span>
-                        <span>-${discountAmount.toLocaleString('ru-RU')} ₽</span>
-                    </div>
-                    ` : ''}
+                    ${promoCodeApplied ? `<div style="text-decoration: line-through; color: var(--gray); text-align: right; margin-top: -10px; margin-bottom: 10px;">
+                        ${subtotal.toLocaleString('ru-RU')} ₽
+                    </div>` : ''}
                     <button class="checkout-btn">
-                        Оформить заказ <i class="fas fa-arrow-right"></i>
+                        Оформить заказ
                     </button>
                 `;
                 cartContent.appendChild(cartSummary);
@@ -2682,6 +2587,7 @@
                 document.querySelector('.checkout-btn')?.addEventListener('click', checkout);
             }
         
+            // Применение промокода
             function applyPromoCode() {
                 const promoCodeInput = document.getElementById('promoCodeInput');
                 const promoCode = promoCodeInput.value.trim().toUpperCase();
@@ -2691,7 +2597,7 @@
                 if (validPromo) {
                     promoCodeApplied = true;
                     discount = validPromo.discount;
-                    showNotification(`Промокод "${validPromo.code}" применен! ${validPromo.description}`);
+                    showNotification(`Промокод ${validPromo.code} применен! ${validPromo.description}`);
                     renderCart();
                 } else {
                     promoCodeApplied = false;
@@ -2700,9 +2606,10 @@
                 }
             }
         
+            // Добавление обработчиков событий для товаров
             function addProductEventListeners() {
                 // Кнопка "Купить"
-                document.querySelectorAll('.buy-btn:not(.disabled)').forEach(btn => {
+                document.querySelectorAll('.buy-btn').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.preventDefault();
                         const productId = parseInt(this.getAttribute('data-id'));
@@ -2720,9 +2627,10 @@
                 });
             }
         
+            // Добавление в корзину
             function addToCart(productId) {
                 const product = products.find(p => p.id === productId);
-                if (!product || !product.inStock) return;
+                if (!product) return;
                 
                 const existingItem = cart.find(item => item.id === productId);
                 
@@ -2752,6 +2660,7 @@
                 }
             }
         
+            // Обновление корзины
             function updateCart(productId, action) {
                 const itemIndex = cart.findIndex(item => item.id === productId);
                 
@@ -2780,6 +2689,7 @@
                 }
             }
         
+            // Переключение избранного
             function toggleFavorite(productId, button) {
                 const index = favorites.indexOf(productId);
                 
@@ -2808,7 +2718,11 @@
                 }
             }
         
+            // Поиск товаров
             function searchProducts() {
+                const searchInput = document.getElementById('searchInput');
+                const productsContainer = document.getElementById('productsContainer');
+                
                 const searchTerm = searchInput.value.toLowerCase().trim();
                 
                 if (!searchTerm) {
@@ -2826,18 +2740,18 @@
                     }
                     
                     // Поиск по бренду
-                    if (searchTerm.includes('adidas') && name.includes('adidas')) {
+                    if (searchTerm.includes('apple') && name.includes('apple')) {
                         return true;
                     }
                     
-                    if (searchTerm.includes('nike') && name.includes('nike')) {
+                    if (searchTerm.includes('gopro') && name.includes('gopro')) {
                         return true;
                     }
                     
                     // Поиск по типу товара
                     const productTypes = [
-                        'кроссовки', 'наушники', 'часы', 'геймпад',
-                        'airpods', 'casio', 'hublot', 'calvin klein'
+                        'смартфон', 'наушники', 'ноутбук', 'часы', 'планшет', 'камера',
+                        'iphone', 'airpods', 'macbook', 'watch', 'ipad', 'телефон'
                     ];
                     
                     for (let type of productTypes) {
@@ -2863,6 +2777,7 @@
                 }
             }
         
+            // Оформление заказа
             function checkout() {
                 if (cart.length === 0) {
                     showNotification('Корзина пуста', 'error');
@@ -2870,14 +2785,13 @@
                 }
                 
                 // Рассчитываем общую сумму
-                let subtotal = cart.reduce((sum, item) => {
+                let total = cart.reduce((sum, item) => {
                     const product = products.find(p => p.id === item.id);
                     return sum + (product ? product.price * item.quantity : 0);
                 }, 0);
                 
-                let total = subtotal;
                 if (promoCodeApplied) {
-                    total = subtotal * (1 - discount);
+                    total = total * (1 - discount);
                 }
                 
                 // Обновляем сумму в форме
@@ -2914,16 +2828,10 @@
                     }, 0),
                     discount: promoCodeApplied ? discount : 0,
                     total: parseFloat(checkoutTotal.textContent.replace(/[^\d.]/g, '')),
-                    orderDate: new Date().toISOString(),
-                    orderId: 'ORD-' + Date.now().toString().slice(-6),
+                    orderDate: new Date().toLocaleString('ru-RU'),
+                    orderId: 'ORD-' + Date.now(),
                     status: 'new'
                 };
-                
-                // Валидация формы
-                if (!orderData.customer.firstName || !orderData.customer.phone) {
-                    showNotification('Пожалуйста, заполните обязательные поля', 'error');
-                    return;
-                }
                 
                 // Сохраняем заказ в Firebase
                 const newOrderRef = database.ref('orders').push();
@@ -2932,14 +2840,6 @@
                         // Сохраняем ID заказа
                         userOrders.push(newOrderRef.key);
                         localStorage.setItem('userOrders', JSON.stringify(userOrders));
-                        
-                        // Добавляем слушатель для нового заказа
-                        orderListeners[newOrderRef.key] = database.ref('orders/' + newOrderRef.key)
-                            .on('value', snapshot => {
-                                if (snapshot.exists()) {
-                                    updateOrderCard(snapshot.val(), newOrderRef.key);
-                                }
-                            });
                         
                         // Очищаем корзину
                         cart = [];
@@ -2953,10 +2853,7 @@
                         closeCheckoutModal();
                         
                         // Показываем уведомление
-                        showNotification(`Заказ #${orderData.orderId} успешно оформлен!`, 'success');
-                        
-                        // Переходим на страницу заказов
-                        showSection('orders');
+                        showNotification(`Заказ ${orderData.orderId} успешно оформлен!`, 'success');
                     })
                     .catch(error => {
                         console.error('Ошибка при сохранении заказа:', error);
@@ -2964,6 +2861,7 @@
                     });
             }
         
+            // Показ уведомлений
             function showNotification(message, type = 'success') {
                 notificationMessage.textContent = message;
                 notification.className = 'notification';
@@ -2974,6 +2872,7 @@
                 }, 3000);
             }
         
+            // Переключение разделов
             function showSection(sectionId) {
                 contentSections.forEach(section => {
                     section.classList.remove('active');
@@ -2986,14 +2885,11 @@
                 } else if (sectionId === 'favorites') {
                     renderFavorites();
                 } else if (sectionId === 'orders') {
-                    loadAndTrackUserOrders();
-                } else if (sectionId === 'catalog') {
-                    applyFilters();
-                } else {
-                    clearOrderListeners();
+                    loadUserOrders();
                 }
             }
         
+            // Бургер-меню
             function toggleSidebar() {
                 burgerBtn.classList.toggle('active');
                 sidebar.classList.toggle('open');
@@ -3008,6 +2904,7 @@
                 document.body.style.overflow = '';
             }
         
+            // Переключение темы
             function toggleTheme() {
                 const currentTheme = document.documentElement.getAttribute('data-theme');
                 const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
@@ -3018,6 +2915,7 @@
                 icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
             }
         
+            // Фильтры
             function openFiltersModal() {
                 filtersModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
@@ -3032,50 +2930,31 @@
                 const maxPrice = parseInt(priceRange.value);
                 const selectedBrands = [];
                 const selectedRatings = [];
-                const inStockOnly = document.getElementById('inStockFilter').checked;
-                const promoOnly = document.getElementById('promoFilter').checked;
                 
                 // Получаем выбранные бренды
-                document.querySelectorAll('.brand-filter:checked').forEach(checkbox => {
-                    selectedBrands.push(checkbox.value);
+                document.querySelectorAll('#brandApple, #brandGoPro').forEach(checkbox => {
+                    if (checkbox.checked) {
+                        selectedBrands.push(checkbox.value);
+                    }
                 });
                 
                 // Получаем выбранные рейтинги
-                document.querySelectorAll('.rating-filter:checked').forEach(checkbox => {
-                    selectedRatings.push(parseFloat(checkbox.value));
+                document.querySelectorAll('#rating45, #rating40').forEach(checkbox => {
+                    if (checkbox.checked) {
+                        selectedRatings.push(parseFloat(checkbox.value));
+                    }
                 });
-                
-                // Обновляем текущие фильтры
-                currentFilters = {
-                    price: maxPrice,
-                    brands: selectedBrands,
-                    ratings: selectedRatings,
-                    inStock: inStockOnly,
-                    isPromo: promoOnly,
-                    sort: document.getElementById('sortFilter').value,
-                    category: currentFilters.category
-                };
                 
                 // Фильтруем товары
                 let filtered = products.filter(product => {
                     // Фильтр по цене
                     if (product.price > maxPrice) return false;
                     
-                    // Фильтр по наличию
-                    if (inStockOnly && !product.inStock) return false;
-                    
-                    // Фильтр по акциям
-                    if (promoOnly && !product.isPromo) return false;
-                    
-                    // Фильтр по категории
-                    if (currentFilters.category !== 'all' && product.category !== currentFilters.category) {
-                        return false;
-                    }
-                    
                     // Фильтр по бренду
                     if (selectedBrands.length > 0) {
-                        const productBrand = getProductBrand(product.name);
-                        if (!productBrand || !selectedBrands.includes(productBrand)) return false;
+                        const productBrand = product.name.includes('Apple') ? 'Apple' : 
+                                          product.name.includes('GoPro') ? 'GoPro' : '';
+                        if (!selectedBrands.includes(productBrand)) return false;
                     }
                     
                     // Фильтр по рейтингу
@@ -3110,27 +2989,6 @@
                 showNotification(`Найдено товаров: ${filtered.length}`);
             }
         
-            function getProductBrand(productName) {
-                const brands = {
-                    'adidas': 'Adidas',
-                    'nike': 'Nike',
-                    'casio': 'Casio',
-                    'calvin klein': 'Calvin Klein',
-                    'hublot': 'Hublot',
-                    'tissot': 'Tissot',
-                    'airpods': 'Apple',
-                    'hk': 'HK'
-                };
-                
-                const lowerName = productName.toLowerCase();
-                for (const [key, brand] of Object.entries(brands)) {
-                    if (lowerName.includes(key)) {
-                        return brand;
-                    }
-                }
-                return null;
-            }
-        
             function clearFilters() {
                 // Сбрасываем все чекбоксы
                 document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
@@ -3144,22 +3002,6 @@
                 // Сбрасываем сортировку
                 document.getElementById('sortFilter').value = 'name';
                 
-                // Сбрасываем категорию
-                currentFilters.category = 'all';
-                categoryBtns.forEach(btn => btn.classList.remove('active'));
-                document.querySelector('.category-btn[data-category="all"]').classList.add('active');
-                
-                // Обновляем текущие фильтры
-                currentFilters = {
-                    price: 150000,
-                    brands: [],
-                    ratings: [],
-                    inStock: false,
-                    isPromo: false,
-                    sort: 'name',
-                    category: 'all'
-                };
-                
                 // Показываем все товары
                 renderProducts(products, productsContainer);
                 showNotification('Фильтры сброшены');
@@ -3172,19 +3014,45 @@
                 // Добавляем активный класс к выбранной кнопке
                 event.target.closest('.category-btn').classList.add('active');
                 
-                // Обновляем текущий фильтр категории
-                currentFilters.category = category;
+                let filtered = products;
                 
-                // Применяем фильтры
-                applyFilters();
+                switch (category) {
+                    case 'smartphones':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('iphone') || p.name.toLowerCase().includes('смартфон'));
+                        break;
+                    case 'headphones':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('airpods') || p.name.toLowerCase().includes('наушники'));
+                        break;
+                    case 'laptops':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('macbook') || p.name.toLowerCase().includes('ноутбук'));
+                        break;
+                    case 'watches':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('watch') || p.name.toLowerCase().includes('часы'));
+                        break;
+                    case 'tablets':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('ipad') || p.name.toLowerCase().includes('планшет'));
+                        break;
+                    case 'cameras':
+                        filtered = products.filter(p => p.name.toLowerCase().includes('gopro') || p.name.toLowerCase().includes('камера'));
+                        break;
+                    case 'all':
+                    default:
+                        filtered = products;
+                        break;
+                }
+                
+                renderProducts(filtered, productsContainer);
+                showNotification(`Категория: ${event.target.closest('.category-btn').textContent.trim()}`);
             }
         
-            // Инициализация приложения
+            // Инициализация
             initTheme();
             updateCartCount();
             updateFavoritesCount();
             renderProducts(products, productsContainer);
-            
+            renderFavorites();
+            renderCart();
+        
             // Обработчики событий
             burgerBtn.addEventListener('click', toggleSidebar);
             overlay.addEventListener('click', closeSidebar);
@@ -3209,8 +3077,7 @@
                 e.preventDefault();
                 searchProducts();
             });
-            searchInput.addEventListener('input', debounce(searchProducts, 300));
-            orderStatusFilter.addEventListener('change', loadAndTrackUserOrders);
+            searchInput.addEventListener('input', searchProducts);
         
             // Навигация по меню
             menuLinks.forEach(link => {
@@ -3229,22 +3096,8 @@
                     selectCategory(category);
                 });
             });
-        
-            // Дебаунс для поиска
-            function debounce(func, wait) {
-                let timeout;
-                return function() {
-                    const context = this, args = arguments;
-                    clearTimeout(timeout);
-                    timeout = setTimeout(() => {
-                        func.apply(context, args);
-                    }, wait);
-                };
-            }
         });
     </script>
 </body>
 </html>
-
-
 
