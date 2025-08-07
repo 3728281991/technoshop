@@ -931,18 +931,27 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
-            gap: 20px;
+            margin: 15px 10px 20px;
+            gap: 15px;
+            position: sticky;
+            top: 70px;
+            background: var(--bg-secondary);
+            z-index: 100;
+            padding: 10px 0;
         }
 
         .categories-row {
             display: flex;
             gap: 10px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
             flex: 1;
             overflow-x: auto;
             scrollbar-width: none;
             -ms-overflow-style: none;
+            white-space: nowrap;
+            padding-bottom: 5px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
         }
 
         .categories-row::-webkit-scrollbar {
@@ -1683,93 +1692,161 @@
             font-weight: 500;
         }
 
+        .page-title {
+            margin: 20px;
+        }
+
+        .logohed {
+            color: #3a56d4;
+        }
+
+        .hr-logo {
+            width: 80%;
+            margin: 0 auto;
+            border: 1px solid var(--line-color);
+        }        
+
         /* Адаптивность */
         @media (max-width: 768px) {
             body {
-                padding-top: 70px;
+                padding-top: 60px;
             }
             
             .burger-btn {
                 display: flex;
             }
             
-            .logo span {
+            .header-container {
+                padding: 0 10px;
+                height: 60px;
+            }
+            
+            .logo {
                 display: none;
             }
             
+            .search-container {
+                margin: 0 10px;
+                max-width: none;
+            }
+            
+            .search-input {
+                padding: 10px 15px 10px 40px;
+                font-size: 14px;
+            }
+            
+            .search-icon {
+                left: 12px;
+                font-size: 14px;
+            }
+            
+            .favorites-btn, .cart-btn {
+                display: none;
+            }
+            
+            .theme-toggle {
+                width: 35px;
+                height: 35px;
+            }
+            
             .categories-filters {
-                flex-direction: row;
-                gap: 15px;
-                align-items: flex-start;
+                margin: 10px;
+                gap: 10px;
             }
             
             .categories-row {
-                flex-wrap: nowrap;
                 gap: 8px;
-                overflow-x: auto;
-                padding-bottom: 5px;
+                padding: 5px 0;
+                margin: 0 -10px;
+                padding: 0 10px;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
             }
             
             .category-btn {
-                padding: 8px 12px;
-                font-size: 12px;
-                white-space: nowrap;
-                flex-shrink: 0;
+                scroll-snap-align: start;
+                padding: 8px 15px;
+                font-size: 13px;
+                min-width: auto;
             }
             
-            .filters-btn {
-                flex-shrink: 0;
-                padding: 8px 16px;
+            .category-btn i {
                 font-size: 12px;
             }
             
             .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                gap: 15px;
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 10px;
+                margin: 15px 10px;
+            }
+            
+            .product-card {
+                margin-bottom: 0;
             }
             
             .product-image {
-                height: 150px;
+                height: 140px;
+            }
+            
+            .product-info {
+                padding: 10px;
             }
             
             .product-name {
-                font-size: 14px;
+                font-size: 13px;
+                min-height: 2.4em;
+                margin-bottom: 5px;
             }
             
             .product-price {
-                font-size: 16px;
+                font-size: 15px;
+                margin: 5px 0;
+            }
+            
+            .old-price {
+                font-size: 12px;
+            }
+            
+            .product-rating {
+                font-size: 12px;
+            }
+            
+            .product-actions {
+                padding: 0 10px 10px;
+                gap: 8px;
+            }
+            
+            .buy-btn {
+                padding: 8px;
+                font-size: 13px;
+            }
+            
+            .action-btn {
+                width: 35px;
+                height: 35px;
             }
             
             .cart-item {
-                flex-direction: column;
+                margin: 10px;
+                flex-direction: row;
             }
             
             .cart-item-image {
-                width: 100%;
-                height: 120px;
+                width: 80px;
+                height: 80px;
             }
-
-            .promo-code-container {
-                flex-direction: column;
+            
+            .cart-item-info {
+                padding: 10px;
+            }
+            
+            .cart-summary {
+                margin: 10px;
             }
             
             .filters-modal-content {
-                margin: 20px;
-                max-height: 90vh;
-            }
-
-            .order-card {
-                padding: 15px;
-            }
-
-            .order-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .order-item img {
-                width: 80px;
-                height: 80px;
+                margin: 15px;
+                max-height: 85vh;
             }
         }
 
@@ -1866,6 +1943,8 @@
 
     <!-- Боковое меню -->
     <aside class="sidebar" id="sidebar">
+        <h1 class="logohed">TechnoShop</h1>
+        <hr class="hr-logo">
         <nav>
             <ul class="sidebar-menu">
                 <li><a href="#" class="menu-link" data-section="catalog"><i class="fas fa-home"></i> Каталог</a></li>
@@ -1984,23 +2063,11 @@
                     <button class="category-btn active" data-category="all">
                         <i class="fas fa-th-large"></i> Все
                     </button>
-                    <button class="category-btn" data-category="smartphones">
-                        <i class="fas fa-mobile-alt"></i> Смартфоны
-                    </button>
                     <button class="category-btn" data-category="headphones">
                         <i class="fas fa-headphones"></i> Наушники
                     </button>
-                    <button class="category-btn" data-category="laptops">
-                        <i class="fas fa-laptop"></i> Ноутбуки
-                    </button>
                     <button class="category-btn" data-category="watches">
                         <i class="fas fa-clock"></i> Часы
-                    </button>
-                    <button class="category-btn" data-category="tablets">
-                        <i class="fas fa-tablet-alt"></i> Планшеты
-                    </button>
-                    <button class="category-btn" data-category="cameras">
-                        <i class="fas fa-camera"></i> Камеры
                     </button>
                 </div>
                 
@@ -2223,7 +2290,8 @@
                 image: "https://i.postimg.cc/CL1tFgrT/5298683007294634161.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true
+                isPromo: true,
+                category: "watches"
             },
             {
                 id: 8,
@@ -2232,7 +2300,8 @@
                 image: "https://i.postimg.cc/dQWHNfsW/5447320113033379628.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true
+                isPromo: true,
+                category: "watches"
             },
             {
                 id: 9,
@@ -2242,7 +2311,8 @@
                 image: "https://i.postimg.cc/Qtvbs2Fs/5454302046229492052.jpg",
                 rating: 4.5,
                 inStock: true,
-                isPromo: true
+                isPromo: true,
+                category: "headphones"
             },
             {
                 id: 10,
@@ -2392,7 +2462,6 @@
                 });
 
                 // Добавляем слушатели для каждого заказа
-// Добавляем слушатели для каждого заказа
 userOrders.forEach(orderId => {
                     database.ref('orders/' + orderId).on('value', snapshot => {
                         if (snapshot.exists()) {
@@ -2614,6 +2683,7 @@ userOrders.forEach(orderId => {
             // Фильтрация товаров
             function filterProducts() {
                 const searchTerm = searchInput.value.toLowerCase();
+                const searchTermCyrillic = searchTerm.replace(/[a-z]/g, ''); // Оставляем только кириллицу
                 const selectedCategory = document.querySelector('.category-btn.active')?.getAttribute('data-category') || 'all';
                 const maxPrice = parseInt(priceRange.value);
                 const selectedBrands = Array.from(document.querySelectorAll('.checkbox-item input[type="checkbox"]:checked'))
@@ -2625,11 +2695,13 @@ userOrders.forEach(orderId => {
                 const sortOption = document.getElementById('sortFilter').value;
 
                 let filteredProducts = products.filter(product => {
-                    const matchesSearch = product.name.toLowerCase().includes(searchTerm);
-                    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-                    const matchesPrice = product.price <= maxPrice;
-                    const matchesBrand = selectedBrands.length === 0 || selectedBrands.includes(product.brand);
-                    const matchesRating = selectedRatings.length === 0 || selectedRatings.some(rating => product.rating >= rating);
+                    if (!product.name) return false; // Пропускаем товары без имени
+                    const nameLower = product.name.toLowerCase();
+                    const matchesSearch = searchTermCyrillic ? nameLower.includes(searchTermCyrillic) : nameLower.includes(searchTerm);
+                    const matchesCategory = selectedCategory === 'all' || (product.category && product.category === selectedCategory);
+                    const matchesPrice = !maxPrice || product.price <= maxPrice;
+                    const matchesBrand = selectedBrands.length === 0 || (product.brand && selectedBrands.includes(product.brand));
+                    const matchesRating = selectedRatings.length === 0 || (product.rating && selectedRatings.some(rating => product.rating >= rating));
                     return matchesSearch && matchesCategory && matchesPrice && matchesBrand && matchesRating;
                 });
 
@@ -2973,12 +3045,21 @@ userOrders.forEach(orderId => {
             checkoutForm.addEventListener('submit', (e) => {
                 e.preventDefault();
                 const formData = new FormData(checkoutForm);
+                // Собираем данные заказа
+                const orderId = 'TS' + Date.now();
                 const orderData = {
-                    items: cart,
-                    total: cart.reduce((sum, item) => {
+                    orderId: orderId,
+                    items: cart.map(item => {
                         const product = products.find(p => p.id === item.id);
-                        return sum + (item.quantity * item.price);
-                    }, 0) * (1 - (promoCodeApplied ? discount : 0)),
+                        return {
+                            id: item.id,
+                            name: product.name,
+                            quantity: item.quantity,
+                            price: item.price,
+                            image: product.image
+                        };
+                    }),
+                    total: cart.reduce((sum, item) => sum + (item.quantity * item.price), 0),
                     timestamp: Date.now(),
                     status: 'new',
                     userInfo: {
@@ -2992,29 +3073,37 @@ userOrders.forEach(orderId => {
                         payment: formData.get('payment')
                     }
                 };
+                // Сохраняем заказ в Firebase
+                firebase.database().ref('orders/' + orderId).set(orderData)
+                    .then(() => {
+                        // Сохраняем id заказа для пользователя
+                        let userOrders = JSON.parse(localStorage.getItem('userOrders')) || [];
+                        userOrders.push(orderId);
+                        localStorage.setItem('userOrders', JSON.stringify(userOrders));
+                        alert('Заказ успешно отправлен!');
+                        checkoutModal.classList.remove('active');
+                        document.body.style.overflow = '';
+                        cart = [];
+                        localStorage.setItem('cart', JSON.stringify(cart));
+                        updateCartCount();
+                        renderCart();
+                        loadUserOrders();
+                    })
+                    .catch(() => {
+                        alert('Ошибка при отправке заказа!');
+                    });
+            });
 
-                // Сохранение заказа в Firebase
-                const newOrderRef = database.ref('orders').push();
-                newOrderRef.set(orderData).then(() => {
-                    userOrders.push(newOrderRef.key);
-                    localStorage.setItem('userOrders', JSON.stringify(userOrders));
-                    cart = [];
-                    localStorage.setItem('cart', JSON.stringify(cart));
-                    promoCodeApplied = false;
-                    discount = 0;
-                    updateCartCount();
-                    checkoutModal.classList.remove('active');
-                    overlay.classList.remove('active');
-                    document.body.style.overflow = '';
-                    checkoutForm.reset();
-                    showNotification('Заказ успешно оформлен!');
-                    renderCart();
-                    loadUserOrders();
-                    contentSections.forEach(sec => sec.classList.remove('active'));
-                    document.getElementById('orders').classList.add('active');
-                }).catch(error => {
-                    showNotification('Ошибка при оформлении заказа', true);
-                    console.error(error);
+            // Category initialization is already done above
+            // Search initialization is already done above
+            // Removed duplicate initialization
+
+            // Инициализация категорий
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    filterProducts();
                 });
             });
 
