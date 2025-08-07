@@ -131,7 +131,6 @@
 
         [data-theme="dark"] .category-btn:hover {
             border-color: var(--primary);
-            color: var(--primary);
         }
 
         [data-theme="dark"] .filters-btn {
@@ -809,8 +808,8 @@
         }
 
         .promo-code-input {
-            width: 140px;
-            padding: 10px 15px;
+            width: 165px;
+            padding: 5px 10px;
             border: 1px solid var(--border);
             border-radius: var(--radius);
             font-size: 14px;
@@ -823,7 +822,7 @@
             border: none;
             border-radius: var(--radius);
             font-size: 14px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             white-space: nowrap;
         }
@@ -1118,6 +1117,7 @@
             transform: translateY(-2px);
         }
 
+
         /* Модальное окно оформления заказа */
         .checkout-modal {
             position: fixed;
@@ -1281,7 +1281,7 @@
         .total-amount {
             font-size: 24px;
             font-weight: 700;
-            color: var(--primary);
+            color: white;
         }
 
         .checkout-actions {
@@ -1318,8 +1318,10 @@
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
-            align-items: center;
+            align-items: center;    /* Выравнивание по вертикали */
+            justify-content: center; /* Выравнивание по горизонтали */
             gap: 8px;
+            text-align: center;
         }
 
         .confirm-checkout-btn:hover {
@@ -1441,7 +1443,7 @@
             background: var(--card-bg);
             border-radius: var(--radius);
             padding: 20px;
-            margin-bottom: 20px;
+            margin: 20px;
             box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
@@ -1518,6 +1520,7 @@
             margin-top: 20px;
             position: relative;
             padding-left: 35px;
+
         }
 
         .timeline-step {
@@ -1636,7 +1639,6 @@
             font-weight: 700;
             text-align: right;
             font-size: 16px;
-            color: var(--primary);
         }
 
         .empty-orders {
@@ -1786,6 +1788,7 @@
             .buy-btn {
                 padding: 8px;
                 font-size: 13px;
+                font-size: 14px;
             }
             
             .action-btn {
@@ -1862,7 +1865,7 @@
             .cancel-checkout-btn,
             .confirm-checkout-btn {
                 width: 100%;
-                padding: 14px;
+                padding: auto;
                 font-size: 16px;
             }
 
@@ -1871,6 +1874,10 @@
                 width: 40px;
                 height: 40px;
                 font-size: 18px;
+                border-radius: 100%;
+                background-color: transparent;
+                border-color: #a7a7a7;
+                color: linear-gradient(135deg, var(--primary), var(--secondary));
             }
 
             .apply-promo-btn {
@@ -1879,6 +1886,7 @@
             }
 
             .promo-code-input {
+
                 height: 44px;
                 font-size: 16px;
             }
@@ -2128,8 +2136,8 @@
                         <div class="filter-section">
                             <h4>Цена</h4>
                             <div class="price-range">
-                                <input type="range" id="priceRange" min="0" max="150000" value="150000" class="price-slider">
-                                <span id="priceValue">до 150 000 ₽</span>
+                                <input type="range" id="priceRange" min="0" max="10000" value="10000" class="price-slider">
+                                <span id="priceValue">до 10 000 ₽</span>
                             </div>
                         </div>
                         
@@ -2875,7 +2883,10 @@ userOrders.forEach(orderId => {
                 }
                 localStorage.setItem('favorites', JSON.stringify(favorites));
                 updateFavoritesCount();
-                renderFavorites();
+                // renderFavorites() вызываем только на странице 'Избранное'
+                if (document.getElementById('favorites').classList.contains('active')) {
+                    renderFavorites();
+                }
             }
 
             // Рендеринг корзины
@@ -3037,7 +3048,7 @@ userOrders.forEach(orderId => {
             // Сброс фильтров
             clearFiltersBtn.addEventListener('click', () => {
                 document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => cb.checked = false);
-                priceRange.value = 150000;
+                priceRange.value = 10000;
                 priceValue.textContent = `до ${priceRange.value} ₽`;
                 document.getElementById('sortFilter').value = 'name';
                 filterProducts();
