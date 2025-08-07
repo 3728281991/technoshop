@@ -221,33 +221,30 @@
             color: #a1a1aa;
         }
 
-        [data-theme="dark"] #promo {
-            background: var(--bg-secondary);
-        }
-
         [data-theme="dark"] #promo .page-title {
-            color: #ffffff;
+            color: var(--text-primary);
         }
 
         [data-theme="dark"] #promo h2 {
-            color: var(--primary) !important;
+            color: var(--accent-light);
         }
 
         [data-theme="dark"] #promo h3 {
-            color: var(--primary) !important;
+            color: var(--accent-light);
         }
 
         [data-theme="dark"] #promo p {
-            color: #ffffff !important;
+            color: var(--text-primary);
         }
 
         [data-theme="dark"] #promo span {
-            color: #ffffff !important;
+            color: var(--text-primary);
         }
 
         [data-theme="dark"] #promo .filters-modal-content {
-            background: #2d2d2d !important;
-            border: 1px solid #404040 !important;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
         }
 
         .header-container {
@@ -310,7 +307,7 @@
 
         .search-container {
             flex-grow: 1;
-            max-width: 500px;
+            max-width: 530px;
             margin: 0 20px;
             position: relative;
         }
@@ -538,42 +535,13 @@
             animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(-100%); }
-            to { transform: translateX(0); }
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-            40% { transform: translateY(-10px); }
-            60% { transform: translateY(-5px); }
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
+        @keyframes simpleShow {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .animate-fade-in {
-            animation: fadeIn 0.6s ease-out;
-        }
-
-        .animate-slide-in {
-            animation: slideIn 0.4s ease-out;
-        }
-
-        .animate-bounce {
-            animation: bounce 0.6s ease-in-out;
-        }
-
-        .animate-pulse {
-            animation: pulse 2s infinite;
+            animation: simpleShow 0.3s ease-out;
         }
 
         /* Карточки товаров */
@@ -600,7 +568,6 @@
         }
 
         .product-card:hover {
-            transform: translateY(-5px);
             box-shadow: var(--shadow-hover);
         }
 
@@ -630,11 +597,6 @@
             height: 100%;
             object-fit: contain;
             display: block;
-            transition: transform 0.4s;
-        }
-
-        .product-card:hover .product-image img {
-            transform: scale(1.05);
         }
 
         .product-info {
@@ -751,11 +713,11 @@
 
         .cart-item-image {
             width: 100px;
-            height: 100px;
+            height: 100%;
             flex-shrink: 0;
             background: var(--primary-light);
             display: flex;
-            align-items: center;
+            align-items: stretch;
             justify-content: center;
             padding: 15px;
         }
@@ -763,10 +725,9 @@
         .cart-item-image img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             display: block;
-            max-width: none;
-            max-height: none;
+            min-height: 100px;
         }
 
         .cart-item-info {
@@ -848,7 +809,7 @@
         }
 
         .promo-code-input {
-            flex-grow: 1;
+            width: 140px;
             padding: 10px 15px;
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -864,7 +825,7 @@
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         .apply-promo-btn:hover {
@@ -967,18 +928,18 @@
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 6px;
             white-space: nowrap;
             flex-shrink: 0;
+            position: relative;
+            z-index: 1;
         }
 
         .category-btn:hover {
             border-color: var(--primary);
             color: var(--primary);
-            transform: translateY(-1px);
         }
 
         .category-btn.active {
@@ -1500,8 +1461,14 @@
             border-bottom: 1px solid var(--border-color);
         }
 
+        .order-left {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
         .order-id {
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--primary);
         }
@@ -2296,15 +2263,15 @@
         // Данные товаров
         const products = [
             {
-                id: 1,
-                name: "Кросовки Adiddas Gazelle",
-                price: 1990,
-                oldPrice: 2500,
-                image: "https://i.postimg.cc/hv2nzGgV/5300739128398310372.jpg",
-                rating: 5.0,
-                badge: "Хит",
-                inStock: true,
-                isPromo: false
+                id: 3,
+                name: "Часы Calvin Klein",
+                price: 2199,
+                image: "https://i.postimg.cc/6382WTZ4/5303507840410971528.jpg",
+                rating: 4.6,
+                badge: "Новинка",
+                inStock: false,
+                isPromo: true,
+                category: "watches"
             },
             {
                 id: 2,
@@ -2560,8 +2527,10 @@ userOrders.forEach(orderId => {
                 let orderHTML = `
                     <div class="order-card animate-fade-in">
                         <div class="order-header">
-                            <span class="order-id">Заказ #${orderId}</span>
-                            <span class="order-date">${orderDate}</span>
+                            <div class="order-left">
+                                <span class="order-id">Заказ #${orderId}</span>
+                                <span class="order-date">${orderDate}</span>
+                            </div>
                             <span class="order-status ${statusClass}">${getStatusText(order.status)}</span>
                         </div>
                         <div class="order-items">
@@ -2815,6 +2784,18 @@ userOrders.forEach(orderId => {
 
                     const productCard = document.createElement('div');
                     productCard.className = `product-card ${stockClass} animate-fade-in`;
+                    
+                    // Calculate stars
+                    const fullStars = Math.floor(product.rating);
+                    const hasHalfStar = product.rating % 1 >= 0.5;
+                    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+                    
+                    const stars = [
+                        ...Array(fullStars).fill('<i class="fas fa-star"></i>'),
+                        hasHalfStar ? '<i class="fas fa-star-half-alt"></i>' : '',
+                        ...Array(emptyStars).fill('<i class="far fa-star"></i>')
+                    ].join('');
+                    
                     productCard.innerHTML = `
                         ${product.badge ? `<span class="product-badge">${product.badge}</span>` : ''}
                         <div class="product-image">
@@ -2823,8 +2804,7 @@ userOrders.forEach(orderId => {
                         <div class="product-info">
                             <h3 class="product-name">${product.name}</h3>
                             <div class="product-rating">
-                                ${Array(Math.floor(product.rating)).fill('<i class="fas fa-star"></i>').join('')}
-                                ${product.rating % 1 !== 0 ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                                ${stars}
                                 <span>(${product.rating})</span>
                             </div>
                             <div class="product-price">
