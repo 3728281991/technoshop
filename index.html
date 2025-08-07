@@ -1848,6 +1848,78 @@
                 margin: 15px;
                 max-height: 85vh;
             }
+
+            /* Стили для модального окна оформления заказа */
+            .checkout-modal-content {
+                width: 95%;
+                max-width: none;
+                margin: 10px;
+                border-radius: 12px;
+            }
+
+            .checkout-form {
+                padding: 15px;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .form-group {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+
+            .form-group label {
+                font-size: 14px;
+            }
+
+            .form-group input {
+                font-size: 16px;
+                padding: 12px;
+            }
+
+            .payment-method {
+                padding: 12px;
+            }
+
+            .payment-label {
+                font-size: 14px;
+            }
+
+            .checkout-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .cancel-checkout-btn,
+            .confirm-checkout-btn {
+                width: 100%;
+                padding: 14px;
+                font-size: 16px;
+            }
+
+            /* Улучшения для сенсорных экранов */
+            .quantity-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            .apply-promo-btn {
+                height: 44px;
+                font-size: 14px;
+            }
+
+            .promo-code-input {
+                height: 44px;
+                font-size: 16px;
+            }
+
+            .checkout-total {
+                font-size: 20px;
+                padding: 15px;
+            }
         }
 
         /* Очень маленькие экраны */
@@ -3056,7 +3128,8 @@ userOrders.forEach(orderId => {
                             name: product.name,
                             quantity: item.quantity,
                             price: item.price,
-                            image: product.image
+                            image: product.image,
+                            product: product // Добавляем полную информацию о продукте
                         };
                     }),
                     total: cart.reduce((sum, item) => sum + (item.quantity * item.price), 0),
@@ -3080,17 +3153,27 @@ userOrders.forEach(orderId => {
                         let userOrders = JSON.parse(localStorage.getItem('userOrders')) || [];
                         userOrders.push(orderId);
                         localStorage.setItem('userOrders', JSON.stringify(userOrders));
-                        alert('Заказ успешно отправлен!');
+                        
+                        // Закрываем модальное окно и очищаем корзину
                         checkoutModal.classList.remove('active');
+                        overlay.classList.remove('active');
                         document.body.style.overflow = '';
+                        
                         cart = [];
                         localStorage.setItem('cart', JSON.stringify(cart));
                         updateCartCount();
                         renderCart();
+                        
+                        // Показываем уведомление
+                        showNotification('Заказ успешно отправлен!', false);
+                        
+                        // Обновляем список заказов и переключаемся на него
                         loadUserOrders();
+                        contentSections.forEach(sec => sec.classList.remove('active'));
+                        document.getElementById('orders').classList.add('active');
                     })
                     .catch(() => {
-                        alert('Ошибка при отправке заказа!');
+                        showNotification('Ошибка при отправке заказа!', true);
                     });
             });
 
