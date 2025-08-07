@@ -811,16 +811,6 @@
     </style>
 </head>
 <body>
-    <div class="login-container" id="loginContainer">
-        <div class="login-form">
-            <h1 class="login-title">Вход в панель администратора</h1>
-            <input type="text" id="username" class="login-input" placeholder="Логин" required>
-            <input type="password" id="password" class="login-input" placeholder="Пароль" required>
-            <button class="login-btn" id="loginBtn">Войти</button>
-            <div class="login-error" id="loginError">Неверный логин или пароль</div>
-        </div>
-    </div>
-
     <button class="theme-toggle" id="themeToggle">
         <i class="fas fa-moon"></i>
     </button>
@@ -929,6 +919,9 @@
                     <button class="export-pdf-btn" id="exportHtmlBtn">
                         <i class="fas fa-file-pdf"></i> Экспорт в HTML
                     </button>
+                    <button class="action-btn btn-info" id="showExtraInfoBtn">
+                        <i class="fas fa-info-circle"></i> Инфо
+                    </button>
                     <button class="action-btn btn-delete" id="deleteOrderBtn">
                         <i class="fas fa-trash"></i> Удалить
                     </button>
@@ -956,7 +949,6 @@
 
         // Основные функции
         function showAdminPanel() {
-            document.getElementById('loginContainer').style.display = 'none';
             document.getElementById('adminHeader').style.display = 'block';
             document.getElementById('adminMain').style.display = 'block';
             document.getElementById('themeToggle').style.display = 'flex';
@@ -980,18 +972,10 @@
         }
 
         function handleLogin() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const loginError = document.getElementById('loginError');
-
-            if (username === 'admin' && password === 'admin') {
-                localStorage.setItem('adminLoggedIn', 'true');
-                showAdminPanel();
-                loadOrders();
-                loginError.style.display = 'none';
-            } else {
-                loginError.style.display = 'block';
-            }
+            // Автоматический вход
+            localStorage.setItem('adminLoggedIn', 'true');
+            showAdminPanel();
+            loadOrders();
         }
 
         function loadOrders() {
@@ -1037,7 +1021,6 @@
         function renderOrdersTable(ordersArray) {
             const ordersTableBody = document.getElementById('ordersTableBody');
             ordersTableBody.innerHTML = '';
-            
             if (ordersArray.length === 0) {
                 ordersTableBody.innerHTML = `
                     <tr>
@@ -1048,13 +1031,12 @@
                     </tr>`;
                 return;
             }
-            
             ordersArray.forEach(order => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td>${order.orderId || 'N/A'}</td>
-                    <td>${order.customer?.firstName || ''} ${order.customer?.lastName || ''}</td>
-                    <td>${formatDate(order.orderDate)}</td>
+                    <td>${order.orderId || order.key}</td>
+                    <td>${order.userInfo ? `${order.userInfo.firstName || ''} ${order.userInfo.lastName || ''}` : ''}</td>
+                    <td>${order.timestamp ? formatDateTime(order.timestamp) : ''}</td>
                     <td>${formatCurrency(order.total || 0)}</td>
                     <td><span class="order-status status-${order.status || 'new'}">${getStatusText(order.status || 'new')}</span></td>
                     <td>
@@ -1069,11 +1051,9 @@
                     </td>`;
                 ordersTableBody.appendChild(row);
             });
-            
             document.querySelectorAll('.btn-view').forEach(btn => {
                 btn.addEventListener('click', () => viewOrder(btn.getAttribute('data-id')));
             });
-            
             document.querySelectorAll('.btn-delete').forEach(btn => {
                 btn.addEventListener('click', () => deleteOrder(btn.getAttribute('data-id')));
             });
@@ -1092,24 +1072,38 @@
         }
 
         function renderOrderDetails(order) {
-            const itemsHtml = order.items?.length > 0 
-                ? order.items.map(item => `
+            
+            // Унификация данных клиента
+            const client = order.userInfo || order.customer || {};
+            // Унификация даты
+            const orderDate = order.timestamp || order.orderDate || '';
+            // Унификация суммы
+            const subtotal = typeof order.subtotal === 'number' ? order.subtotal : (typeof order.total === 'number' ? order.total : 0);
+            const total = typeof order.total === 'number' ? order.total : subtotal;
+            // Формирование HTML товаров
+            const itemsHtml = (order.items || []).length > 0 
+                ? (order.items || []).map(item => {
+                    const product = item.product || {};
+                    const productTitle = product.title || item.title || item.productName || item.name || '';
+                    return `
                     <tr>
                         <td>
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <div class="order-item-image">
-                                    <img src="${item.image || 'https://via.placeholder.com/60'}" alt="${item.name || 'Товар'}" onerror="this.src='https://via.placeholder.com/60'">
+                                    <img src="${product.image || item.image || 'https://via.placeholder.com/60'}" 
+                                         alt="${productTitle || 'Товар'}" 
+                                         onerror="this.src='https://via.placeholder.com/60'">
                                 </div>
-                                <div>${item.name || 'Без названия'}</div>
+                                <div>${productTitle || 'Неизвестный товар'}</div>
                             </div>
                         </td>
-                        <td>${formatCurrency(item.price || 0)}</td>
+                        <td>${formatCurrency(product.price || item.price || 0)}</td>
                         <td>${item.quantity || 1}</td>
-                        <td>${formatCurrency((item.price || 0) * (item.quantity || 1))}</td>
+                        <td>${formatCurrency((product.price || item.price || 0) * (item.quantity || 1))}</td>
                     </tr>`
-                ).join('')
+                }).join('')
                 : `<tr><td colspan="4" style="text-align: center;">Нет товаров в заказе</td></tr>`;
-            
+
             document.getElementById('orderModalBody').innerHTML = `
                 <div class="order-details-grid">
                     <div class="order-section">
@@ -1117,29 +1111,28 @@
                         <div class="order-info">
                             <div class="order-info-row">
                                 <div class="order-info-label">Имя:</div>
-                                <div class="order-info-value">${order.customer?.firstName || ''} ${order.customer?.lastName || ''}</div>
+                                <div class="order-info-value">${client.firstName || ''} ${client.lastName || ''}</div>
                             </div>
                             <div class="order-info-row">
                                 <div class="order-info-label">Email:</div>
-                                <div class="order-info-value">${order.customer?.email || 'Не указан'}</div>
+                                <div class="order-info-value">${client.email || 'Не указан'}</div>
                             </div>
                             <div class="order-info-row">
                                 <div class="order-info-label">Телефон:</div>
-                                <div class="order-info-value">${order.customer?.phone || 'Не указан'}</div>
+                                <div class="order-info-value">${client.phone || 'Не указан'}</div>
                             </div>
                             <div class="order-info-row">
                                 <div class="order-info-label">Адрес:</div>
-                                <div class="order-info-value">${order.customer?.address || ''}, ${order.customer?.city || ''}${order.customer?.postalCode ? ', ' + order.customer.postalCode : ''}</div>
+                                <div class="order-info-value">${client.address || ''}${client.city ? ', ' + client.city : ''}${client.postalCode ? ', ' + client.postalCode : ''}</div>
                             </div>
                         </div>
                     </div>
-                    
                     <div class="order-section">
                         <h4>Информация о заказе</h4>
                         <div class="order-info">
                             <div class="order-info-row">
                                 <div class="order-info-label">Дата заказа:</div>
-                                <div class="order-info-value">${formatDateTime(order.orderDate)}</div>
+                                <div class="order-info-value">${orderDate ? formatDateTime(orderDate) : 'Не указана'}</div>
                             </div>
                             <div class="order-info-row">
                                 <div class="order-info-label">Способ оплаты:</div>
@@ -1152,7 +1145,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="order-section">
                     <h4>Товары в заказе</h4>
                     <table class="order-items">
@@ -1164,25 +1156,55 @@
                                 <th>Сумма</th>
                             </tr>
                         </thead>
-                        <tbody>${itemsHtml}</tbody>
+                        <tbody>
+                            ${(order.items || []).map(item => `
+                                <tr>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <div class="order-item-image">
+                                                <img src="${item.image || 'https://via.placeholder.com/60'}" 
+                                                     alt="${item.name || item.productName || item.title || 'Товар'}" 
+                                                     onerror="this.src='https://via.placeholder.com/60'">
+                                            </div>
+                                            <div>${item.name || item.productName || item.title || 'Товар'}</div>
+                                        </div>
+                                    </td>
+                                    <td>${formatCurrency(item.price || 0)}</td>
+                                    <td>${item.quantity || 1}</td>
+                                    <td>${formatCurrency((item.price || 0) * (item.quantity || 1))}</td>
+                                </tr>
+                            `).join('') || `
+                                <tr>
+                                    <td colspan="4" style="text-align: center;">Нет товаров в заказе</td>
+                                </tr>
+                            `}
+                        </tbody>
                     </table>
-                    
                     <div class="order-summary">
                         <table class="order-summary-table">
                             <tr>
                                 <td>Сумма заказа:</td>
-                                <td>${formatCurrency(order.subtotal || 0)}</td>
+                                <td>${formatCurrency(subtotal)}</td>
                             </tr>
                             ${order.discount ? `
                             <tr>
                                 <td>Скидка:</td>
-                                <td>-${formatCurrency((order.subtotal || 0) * order.discount)} (${order.discount * 100}%)</td>
+                                <td>-${formatCurrency(subtotal * order.discount)} (${order.discount * 100}%)</td>
                             </tr>` : ''}
                             <tr>
                                 <td>Итого к оплате:</td>
-                                <td>${formatCurrency(order.total || 0)}</td>
+                                <td>${formatCurrency(total)}</td>
                             </tr>
                         </table>
+                    </div>
+                </div>
+                <div id="extraOrderInfo" style="display:none; margin-top:20px;">
+                    <h4>Дополнительная информация</h4>
+                    <div class="order-info">
+                        <div class="order-info-row"><span class="order-info-label">Комментарий:</span><span class="order-info-value">${order.comment || 'Нет комментария'}</span></div>
+                        <div class="order-info-row"><span class="order-info-label">ID заказа:</span><span class="order-info-value">${order.orderId || order.key}</span></div>
+                        <div class="order-info-row"><span class="order-info-label">Ключ заказа:</span><span class="order-info-value">${order.key || ''}</span></div>
+                        <div class="order-info-row"><span class="order-info-label">Дата создания:</span><span class="order-info-value">${order.timestamp ? formatDateTime(order.timestamp) : ''}</span></div>
                     </div>
                 </div>`;
         }
@@ -1327,13 +1349,16 @@
         }
 
         // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
-            if (localStorage.getItem('adminLoggedIn') === 'true') {
-                showAdminPanel();
-                loadOrders();
+        document.getElementById('showExtraInfoBtn').addEventListener('click', function() {
+            const extraInfo = document.getElementById('extraOrderInfo');
+            if (extraInfo) {
+                extraInfo.style.display = extraInfo.style.display === 'none' ? 'block' : 'none';
             }
-
-            document.getElementById('loginBtn').addEventListener('click', handleLogin);
+        });
+        document.addEventListener('DOMContentLoaded', function() {
+            // Показываем админ панель сразу
+            showAdminPanel();
+            loadOrders();
             document.getElementById('themeToggle').addEventListener('click', toggleTheme);
             document.getElementById('statusFilter').addEventListener('change', filterOrders);
             document.getElementById('sortFilter').addEventListener('change', filterOrders);
@@ -1359,12 +1384,8 @@
                     .catch(error => showNotification('Ошибка удаления', 'error'));
             });
 
-            // Обработка нажатия клавиши Enter в форме входа
-            document.getElementById('password').addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
-            });
+            // Автоматически показываем панель администратора
+            showAdminPanel();
         });
     </script>
 </body>
