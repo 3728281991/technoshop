@@ -506,9 +506,9 @@
 
         /* Основной контент */
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px 15px;
+            width: 100%;
+            margin: 0;
+            padding: 10px 0px;
         }
 
         .page-title {
@@ -594,7 +594,7 @@
         .product-image img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            object-fit: cover;
             display: block;
         }
 
@@ -1281,7 +1281,7 @@
         .total-amount {
             font-size: 24px;
             font-weight: 700;
-            color: white;
+            color: #fd710a;
         }
 
         .checkout-actions {
@@ -1673,7 +1673,36 @@
             width: 80%;
             margin: 0 auto;
             border: 1px solid var(--line-color);
-        }        
+        }
+
+        /* Стили для раздела Акции (promo) с поддержкой темной темы */
+        [data-theme="dark"] #promo .page-title {
+            color: var(--primary);
+        }
+        [data-theme="dark"] #promo div[style*="background: white"] {
+            background: var(--card-bg) !important;
+            color: var(--text-primary) !important;
+            box-shadow: var(--shadow-hover);
+        }
+        [data-theme="dark"] #promo div[style*="background: linear-gradient"] {
+            background: linear-gradient(135deg, var(--primary-light), #232a3a) !important;
+            color: var(--text-primary) !important;
+            border-color: var(--primary);
+        }
+        [data-theme="dark"] #promo h2,
+        [data-theme="dark"] #promo h3,
+        [data-theme="dark"] #promo p,
+        [data-theme="dark"] #promo span {
+            color: var(--text-primary) !important;
+        }
+        [data-theme="dark"] #promo div[style*="background: #f8f9fa"] {
+            background: #232a3a !important;
+            color: var(--text-secondary) !important;
+            border-left: 4px solid var(--success);
+        }
+        [data-theme="dark"] #promo i {
+            color: var(--primary) !important;
+        }
 
         /* Адаптивность */
         @media (max-width: 768px) {
@@ -2270,17 +2299,6 @@
 
         // Данные товаров
         const products = [
-            {
-                id: 3,
-                name: "Часы Calvin Klein",
-                price: 2199,
-                image: "https://i.postimg.cc/6382WTZ4/5303507840410971528.jpg",
-                rating: 4.6,
-                badge: "Новинка",
-                inStock: false,
-                isPromo: true,
-                category: "watches"
-            },
             {
                 id: 2,
                 name: "Кросовки Nike",
