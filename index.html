@@ -806,21 +806,23 @@
 
         .cart-item-image {
             width: 100px;
-            height: 100%;
+
             flex-shrink: 0;
             background: var(--primary-light);
             display: flex;
-            align-items: stretch;
-            justify-content: center;
-            padding: 15px;
+            align-items: center; /* центрируем по вертикали */
+            justify-content: center; /* центрируем по горизонтали */
+            overflow: hidden; /* скрываем части изображения, выходящие за границы */
+            
         }
 
         .cart-item-image img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
-            display: block;
-            min-height: 100px;
+            object-fit: cover; /* заполняет всю область, сохраняя пропорции, обрезая если нужно */
+
+            min-width: 100%; /* гарантирует растяжение по ширине */
+            min-height: 100%; /* гарантирует растяжение по высоте */
         }
 
         .cart-item-info {
@@ -954,7 +956,7 @@
         .notification {
             position: fixed;
             top: 20px;
-            right: 20px;
+            right: 5px;
             background: var(--success);
             color: white;
             padding: 15px 25px;
@@ -1804,8 +1806,46 @@
                 padding-top: 60px;
             }
             
+            .notification {
+                top: 8%; /* Смещаем в центр */
+                width: 90%; /* Ширина уведомления */
+                max-width: 300px; /* Максимальная ширина */
+                text-align: center; /* Текст по центру */
+            }
+
             .burger-btn {
                 display: flex;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -300px;
+                width: 300px;
+                height: 100%;
+                transition: transform 0.3s ease;
+                z-index: 1000;
+            }
+
+            .sidebar.open {
+                transform: translateX(300px);
+            }
+
+            .overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+                z-index: 999;
+            }
+
+            .overlay.active {
+                opacity: 1;
+                pointer-events: all;
             }
             
             .header-container {
@@ -1922,11 +1962,6 @@
             .cart-item {
                 margin: 10px;
                 flex-direction: row;
-            }
-            
-            .cart-item-image {
-                width: 80px;
-                height: 80px;
             }
             
             .cart-item-info {
@@ -2182,6 +2217,10 @@
                         <div class="form-group">
                             <label for="postalCode">Индекс</label>
                             <input type="text" id="postalCode" name="postalCode">
+                        </div>
+                        <div class="form-group">
+                            <label for="teleUserName">Имя пользователя Telegram *</label>
+                            <input type="text" id="teleUserName" name="teleUserName" required>
                         </div>
                     </div>
                 </div>
@@ -2556,9 +2595,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Получаем элементы DOM
             const burgerBtn = document.querySelector('.burger-btn');
-            const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('overlay');
             const cartBtn = document.querySelector('.cart-btn');
+            const openThreshold = window.innerWidth * 0.2; 
             const favoritesBtn = document.querySelector('.favorites-btn');
             const searchContainer = document.getElementById('searchContainer');
             const searchForm = document.getElementById('searchForm');
@@ -2585,6 +2624,7 @@
             const cancelCheckoutBtn = document.getElementById('cancelCheckoutBtn');
             const checkoutForm = document.getElementById('checkoutForm');
             const checkoutTotal = document.getElementById('checkoutTotal');
+            
 
             // Инициализация данных
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
@@ -2804,21 +2844,93 @@ userOrders.forEach(orderId => {
                 icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
             });
 
-            // Открытие/закрытие бокового меню
-            burgerBtn.addEventListener('click', () => {
-                sidebar.classList.toggle('open');
-                overlay.classList.toggle('active');
-                burgerBtn.classList.toggle('active');
-                document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+            // Элементы управления
+
+
+            // Константы
+            const SWIPE_THRESHOLD = 50; // Минимальный свайп для срабатывания
+            const EDGE_ZONE = 30; // Зона у края для легкого открытия
+            const SIDEBAR_WIDTH = 300; // Ширина меню
+
+            // Переменные для свайпа
+            let startX = 0;
+            let currentX = 0;
+            let isSwiping = false;
+
+            // Основная функция переключения
+            function toggleSidebar(shouldOpen) {
+            const open = shouldOpen !== undefined ? shouldOpen : !sidebar.classList.contains('open');
+            
+            sidebar.classList.toggle('open', open);
+            overlay.classList.toggle('active', open);
+            burgerBtn.classList.toggle('active', open);
+            document.body.style.overflow = open ? 'hidden' : '';
+            
+            // Сброс трансформаций
+            sidebar.style.transform = '';
+            overlay.style.opacity = '';
+            }
+
+            // Обработчики кликов
+            burgerBtn.addEventListener('click', () => toggleSidebar());
+            overlay.addEventListener('click', () => toggleSidebar(false));
+
+            // Свайп-логика
+            document.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            currentX = startX;
+            isSwiping = true;
+            
+            // Временное отключение анимаций для плавного слежения
+            sidebar.style.transition = 'none';
+            overlay.style.transition = 'none';
             });
 
-            overlay.addEventListener('click', () => {
-                sidebar.classList.remove('open');
-                overlay.classList.remove('active');
-                burgerBtn.classList.remove('active');
-                filtersModal.classList.remove('active');
-                checkoutModal.classList.remove('active');
-                document.body.style.overflow = '';
+            document.addEventListener('touchmove', (e) => {
+            if (!isSwiping) return;
+            
+            currentX = e.touches[0].clientX;
+            const diffX = currentX - startX;
+            
+            // Открытие при свайпе вправо
+            if (!sidebar.classList.contains('open')) {
+                const translate = Math.min(diffX, SIDEBAR_WIDTH);
+                sidebar.style.transform = `translateX(${translate}px)`;
+                overlay.style.opacity = `${translate/SIDEBAR_WIDTH*0.5}`;
+            } 
+            // Закрытие при свайпе влево
+            else {
+                const translate = Math.max(SIDEBAR_WIDTH + diffX, 0);
+                sidebar.style.transform = `translateX(${translate}px)`;
+                overlay.style.opacity = `${translate/SIDEBAR_WIDTH*0.5}`;
+            }
+            });
+
+            document.addEventListener('touchend', () => {
+            if (!isSwiping) return;
+            
+            const diffX = currentX - startX;
+            
+            // Восстановление анимаций
+            sidebar.style.transition = 'transform 0.2s ease';
+            overlay.style.transition = 'opacity 0.2s ease';
+            
+            // Автодокрутка до конечного состояния
+            if (!sidebar.classList.contains('open')) {
+                if ((startX < EDGE_ZONE && diffX > SWIPE_THRESHOLD*0.5) || diffX > SWIPE_THRESHOLD) {
+                toggleSidebar(true);
+                } else {
+                toggleSidebar(false);
+                }
+            } else {
+                if (diffX < -SWIPE_THRESHOLD) {
+                toggleSidebar(false);
+                } else {
+                toggleSidebar(true);
+                }
+            }
+            
+            isSwiping = false;
             });
 
             // Навигация по меню
